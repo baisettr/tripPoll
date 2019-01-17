@@ -6,6 +6,26 @@ app.listen(5000, function () {
     console.log("Listening here");
 })
 
+// mlab fetch trip
+app.get('/trip', function (req, res) {
+    console.log(req.query.tripId);
+    const tripId = req.query.tripId;
+    trip(tripId, (data) => {
+        res.send(data);
+    })
+})
+
+function trip(tripId, callback) {
+    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ&q={"tripId":' + tripId + '}';
+    axios.get(url
+    ).then((res) => {
+        //console.log(res.data);
+        return callback(res.data);
+    }).catch((error) => {
+        console.log(error);
+    });
+}
+
 // google places
 app.get('/places', function (req, res) {
     console.log(req.query.dest);
