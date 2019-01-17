@@ -6,15 +6,14 @@ import Options from './containers/Options';
 import Propose from './containers/Propose';
 import Select from './containers/Select';
 import View from './containers/View';
+import NavBar from './containers/Navbar';
 import { Label } from 'react-bootstrap';
 
 class App extends Component {
   render() {
     return (
       <div className="App">
-        <h2><Label>Trip Poll</Label></h2>
-        <button className="btn btn-link"><Link to="/propose">Propose a Trip</Link></button>
-        <button className="btn btn-link"><Link to="/view">View a Trip</Link></button>
+        <NavBar />
         <Switch>
           <Route path="/" exact component={Place} />
           <Route path="/options" component={Options} />
