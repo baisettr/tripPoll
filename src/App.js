@@ -7,7 +7,6 @@ import Propose from './containers/Propose';
 import Select from './containers/Select';
 import View from './containers/View';
 import NavBar from './containers/Navbar';
-import { Label } from 'react-bootstrap';
 
 class App extends Component {
   render() {
