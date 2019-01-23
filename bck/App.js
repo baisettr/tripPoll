@@ -1,10 +1,75 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const axios = require('axios');
+
 var app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.listen(5000, function () {
     console.log("Listening here");
 })
+
+// mlab save a new user
+app.post('/newUser', function (req, res) {
+    console.log(req.body.userData);
+    const userDetails = req.body.userData;
+    newUser(userDetails, (data) => {
+        res.send(data);
+    })
+})
+
+function newUser(userDetails, callback) {
+    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/users?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ';
+    axios.post(url, userDetails
+    ).then((res) => {
+        //console.log(res.data);
+        return callback(res.data);
+    }).catch((error) => {
+        console.log(error);
+    });
+}
+
+// mlab get user trips
+app.get('/userTrips', function (req, res) {
+    console.log(req.query.userId);
+    const userId = req.body.userId;
+    userTrips(userId, (data) => {
+        res.send(data);
+    })
+})
+
+function userTrips(userId, callback) {
+    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/users?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ&q={"userId":' + userId + '}';
+    axios.get(url
+    ).then((res) => {
+        //console.log(res.data);
+        return callback(res.data);
+    }).catch((error) => {
+        console.log(error);
+    });
+}
+
+// mlab save a new trip
+app.post('/newTrip', function (req, res) {
+    console.log(req.body.userId);
+    console.log(req.body.tripData);
+    const tripDetails = req.body.tripData;
+    newTripSave(tripDetails, (data) => {
+        res.send(data);
+    })
+})
+
+function newTripSave(tripDetails, callback) {
+    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ';
+    axios.post(url, tripDetails
+    ).then((res) => {
+        //console.log(res.data);
+        return callback(res.data);
+    }).catch((error) => {
+        console.log(error);
+    });
+}
 
 // mlab fetch trip
 app.get('/trip', function (req, res) {
@@ -27,17 +92,19 @@ function trip(tripId, callback) {
 }
 
 // mlab save trip options
-app.post('/tripOpt', function (req, res) {
+app.post('/tripOptions', function (req, res) {
     console.log(req.body.options);
-    const tripId = req.query.tripId;
-    tripOptSave(tripId, (data) => {
+    console.log(req.body.tripId);
+    const tripId = req.body.tripId;
+    const options = req.body.options;
+    tripOptionsSave(tripId, options, (data) => {
         res.send(data);
     })
 })
 
-function tripOptSave(tripId, options, callback) {
-    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ&q={"tripId":' + tripId + '}';
-    axios.get(url, options
+function tripOptionsSave(tripId, options, callback) {
+    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips/' + tripId + '?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ';
+    axios.put(url, { "$set": { "options": options } }
     ).then((res) => {
         //console.log(res.data);
         return callback(res.data);
@@ -47,17 +114,19 @@ function tripOptSave(tripId, options, callback) {
 }
 
 // mlab finalize trip options
-app.post('/tripFin', function (req, res) {
+app.post('/tripFinal', function (req, res) {
     console.log(req.body.options);
-    const tripId = req.query.tripId;
-    tripFinal(tripId, (data) => {
+    console.log(req.body.tripId);
+    const tripId = req.body.tripId;
+    const options = req.body.options;
+    tripFinal(tripId, options, (data) => {
         res.send(data);
     })
 })
 
 function tripFinal(tripId, options, callback) {
-    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ&q={"tripId":' + tripId + '}';
-    axios.get(url, options
+    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips/' + tripId + '?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ';
+    axios.put(url, { "$set": { "finalTrip": options } }
     ).then((res) => {
         //console.log(res.data);
         return callback(res.data);
