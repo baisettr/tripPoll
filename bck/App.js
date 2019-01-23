@@ -46,6 +46,26 @@ function tripOptSave(tripId, options, callback) {
     });
 }
 
+// mlab finalize trip options
+app.post('/tripFin', function (req, res) {
+    console.log(req.body.options);
+    const tripId = req.query.tripId;
+    tripFinal(tripId, (data) => {
+        res.send(data);
+    })
+})
+
+function tripFinal(tripId, options, callback) {
+    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ&q={"tripId":' + tripId + '}';
+    axios.get(url, options
+    ).then((res) => {
+        //console.log(res.data);
+        return callback(res.data);
+    }).catch((error) => {
+        console.log(error);
+    });
+}
+
 // google places
 app.get('/places', function (req, res) {
     console.log(req.query.dest);
