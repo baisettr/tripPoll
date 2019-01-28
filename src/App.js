@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import { Route, Switch, Link } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import './App.css';
-import Place from './containers/Place';
+import Home from './containers/Home';
 import Options from './containers/Options';
 import Propose from './containers/Propose';
 import Select from './containers/Select';
 import View from './containers/View';
-import NavBar from './containers/Navbar';
+import NavBar from './containers/Nav';
 
 class App extends Component {
   render() {
@@ -14,7 +14,7 @@ class App extends Component {
       <div className="App">
         <NavBar />
         <Switch>
-          <Route path="/" exact component={Place} />
+          <Route path="/" exact component={Home} />
           <Route path="/options" component={Options} />
           <Route path="/propose" component={Propose} />
           <Route path="/select" component={Select} />
