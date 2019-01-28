@@ -52,15 +52,14 @@ function userTrips(userId, callback) {
 
 // mlab save a new trip
 app.post('/newTrip', function (req, res) {
-    console.log(req.body.userId);
-    console.log(req.body.tripData);
-    const tripDetails = req.body.tripData;
-    newTripSave(tripDetails, (data) => {
+    //console.log(req.body.data);
+    const tripDetails = req.body.data;
+    saveNewTrip(tripDetails, (data) => {
         res.send(data);
     })
 })
 
-function newTripSave(tripDetails, callback) {
+function saveNewTrip(tripDetails, callback) {
     const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ';
     axios.post(url, tripDetails
     ).then((res) => {
