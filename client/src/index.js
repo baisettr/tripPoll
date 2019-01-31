@@ -6,7 +6,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 const app = (
-    <BrowserRouter basename="/trpo">
+    <BrowserRouter>
         <App />
     </BrowserRouter>
 );
