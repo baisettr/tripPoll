@@ -18,7 +18,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://localhost:5000/",
+  "proxy": "https://rkbeavs.me/trpo",
+  "homepage": "https://rkbeavs.me/trpo",
   "browserslist": [
     ">0.2%",
     "not dead",
