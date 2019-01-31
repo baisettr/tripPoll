@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
+const keys = require('./config/keys');
 
 var app = express();
 app.use(bodyParser.json());
@@ -20,7 +21,7 @@ app.post('/newUser', function (req, res) {
 })
 
 function newUser(userDetails, callback) {
-    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/users?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ';
+    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/users?apiKey=' + keys.mlabAPIKey;
     axios.post(url, userDetails
     ).then((res) => {
         //console.log(res.data);
@@ -40,7 +41,7 @@ app.get('/userTrips', function (req, res) {
 })
 
 function userTrips(userId, callback) {
-    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/users?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ&q={"userId":' + userId + '}';
+    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/users?apiKey=' + keys.mlabAPIKey + '&q={"userId":' + userId + '}';
     axios.get(url
     ).then((res) => {
         //console.log(res.data);
@@ -60,7 +61,7 @@ app.post('/newTrip', function (req, res) {
 })
 
 function saveNewTrip(tripDetails, callback) {
-    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ';
+    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips?apiKey=' + keys.mlabAPIKey;
     axios.post(url, tripDetails
     ).then((res) => {
         //console.log(res.data);
@@ -80,7 +81,7 @@ app.get('/trip', function (req, res) {
 })
 
 function trip(tripId, callback) {
-    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ&q={"tripId":' + tripId + '}';
+    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips?apiKey=' + keys.mlabAPIKey + '&q={"tripId":' + tripId + '}';
     axios.get(url
     ).then((res) => {
         //console.log(res.data);
@@ -102,7 +103,7 @@ app.post('/tripOptions', function (req, res) {
 })
 
 function tripOptionsSave(tripId, options, callback) {
-    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips/' + tripId + '?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ';
+    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips/' + tripId + '?apiKey=' + keys.mlabAPIKey;
     axios.put(url, { "$set": { "options": options } }
     ).then((res) => {
         //console.log(res.data);
@@ -124,7 +125,7 @@ app.post('/tripFinal', function (req, res) {
 })
 
 function tripFinal(tripId, options, callback) {
-    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips/' + tripId + '?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ';
+    const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips/' + tripId + '?apiKey=' + keys.mlabAPIKey;
     axios.put(url, { "$set": { "finalTrip": options } }
     ).then((res) => {
         //console.log(res.data);
@@ -145,7 +146,7 @@ app.get('/places', function (req, res) {
 })
 
 function places(dest, callback) {
-    const url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=' + dest + '+tourist+attractions&language=en&key=AIzaSyDiFYXE3HoT8ux5MqVFaeYLDLQcZvhAqqs';
+    const url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=' + dest + '+tourist+attractions&language=en&key=' + keys.googleAPIKey;
     axios.get(url,
         {}).then((res) => {
             //console.log(res.data);
@@ -166,7 +167,7 @@ app.get('/placeSuggestions', function (req, res) {
 })
 
 function placeSuggestions(dest, callback) {
-    const url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=' + dest + '&types=geocode&key=AIzaSyDiFYXE3HoT8ux5MqVFaeYLDLQcZvhAqqs';
+    const url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=' + dest + '&types=geocode&key=' + keys.googleAPIKey;
     axios.get(url,
         {}).then((res) => {
             const pr = res.data.predictions;
@@ -200,7 +201,7 @@ function getL(place) {
         'content-type': 'application/json',
         'accept': 'application/json',
         'accept-language': 'en-us',
-        'x-airbnb-api-key': '915pw2pnf4h1aiguhph5gc5b2',
+        'x-airbnb-api-key': keys.airbnbAPIKey,
         'x-airbnb-locale': 'en',
         'x-airbnb-currency': 'USD',
     }
@@ -236,7 +237,7 @@ function airbnbPlaces(location, callback) {
         'content-type': 'application/json',
         'accept': 'application/json',
         'accept-language': 'en-us',
-        'x-airbnb-api-key': '915pw2pnf4h1aiguhph5gc5b2',
+        'x-airbnb-api-key': keys.airbnbAPIKey,
         'x-airbnb-locale': 'en',
         'x-airbnb-currency': 'USD',
     };
@@ -259,5 +260,14 @@ function airbnbPlaces(location, callback) {
     }).catch((error) => {
         console.log(error);
     });
+}
+
+if (process.env.NOD_ENV === 'production') {
+    app.use(express.static('client/build'));
+
+    const path = require('path');
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+    })
 }
 
