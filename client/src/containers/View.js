@@ -1,195 +1,187 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import DayPicker from 'react-day-picker';
+import 'react-day-picker/lib/style.css';
+
+const styles = {
+    divHome: {
+        backgroundColor: "rgba(255, 255, 255)",
+        textAlign: 'center',
+        marginTop: '15px'
+    }
+}
 
 class View extends Component {
     constructor(props) {
         super(props);
-        this.state = { tripId: "", place: "", updatedPlaces: [], selUrl: "", optUrl: "", selectedList: {}, owner: "", flag: true, error: "", open: false, activeItemName: "", activeItemId: null, updatedDays: [], updatedListings: [], selectedDates: [], selectedListings: [], userShare: "", userCar: "" };
+        this.state = { error: "", tripId: "", finalTrip: {}, activeStep: 0, destination: "", selectedAirbnbPlaces: [], selectedGooglePlaces: [], listAirbnbPlaces: [], listGooglePlaces: [] };
     }
-    componentDidMount() {
 
-    }
-    getTripDetails = (tripId) => {
-        const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips?apiKey=n4-BYGvNjWwu5oSsLuEWMx9NO19MvmZJ&q={"tripId":' + tripId + '}';
+    getTripDetails = (e) => {
+        e.preventDefault();
+        const tripId = this.state.tripId;
+
+        const url = '/trip?tripId=' + tripId;
         axios.get(url,
         ).then((res) => {
-            if (res.data.length) {
-                const trip = res.data[0];
-                let selList = {};
-                let selDateList = {};
-                let selAirList = {};
-                let userShare = "N/A";
-                let userCar = "Not Yet Decided";
-                if (!trip.finalTrip) {
-                    trip.cityPlaces.map((e) => {
-                        selList[e.id] = false;
-                        return ""
-                    });
 
-                    trip.tripDays.map((e, index) => {
-                        selDateList[index] = false;
-                        return ""
-                    });
+            const trip = res.data[0];
+            if (trip) {
+                if (trip.finalTrip) {
+                    const { finalTrip, tripDestination, tripListGooglePlaces, tripListAirbnbPlaces } = trip;
+                    let selectedGooglePlaces = [];
+                    for (const i in tripListGooglePlaces) {
+                        const place = tripListGooglePlaces[i];
+                        if (finalTrip.selectedGooglePlaces[place.id] === 1) {
+                            selectedGooglePlaces.push(place);
+                        }
+                    };
+                    let selectedAirbnbPlaces = [];
+                    for (const i in tripListAirbnbPlaces) {
+                        const room = tripListAirbnbPlaces[i];
+                        if (finalTrip.selectedAirbnbPlaces[room.id] === 1) {
+                            selectedAirbnbPlaces.push(room);
+                        }
+                    };
 
-                    trip.airbnbPlaces.map((e, index) => {
-                        selAirList[index] = false;
-                        return ""
-                    });
-                }
-                else {
-                    selList = trip.finalTrip.selPlaces;
-                    selDateList = trip.finalTrip.selDays;
-                    selAirList = trip.finalTrip.selListings;
-                    userShare = trip.finalTrip.userShare;
-                    userCar = trip.finalTrip.userCar;
-                }
-                const selUrl = '/select?tripId=' + tripId;
-                const optUrl = '/options?tripId=' + tripId;
-                this.setState({ updatedPlaces: trip.cityPlaces, updatedDays: trip.tripDays, updatedListings: trip.airbnbPlaces, selectedDates: selDateList, selectedListings: selAirList, selectedList: selList, place: trip.city, owner: trip.owner, userShare: userShare, userCar: userCar, flag: false, selUrl: selUrl, optUrl: optUrl });
-            }
-            else {
-                this.setState({ error: "Please enter a valid trip ID!" })
+                    this.setState({ activeStep: 1, destination: tripDestination, listGooglePlaces: tripListGooglePlaces, listAirbnbPlaces: tripListAirbnbPlaces, selectedAirbnbPlaces, selectedGooglePlaces, finalTrip });
+                } else { this.setState({ activeStep: 2 }); }
+            } else {
+                this.setState({ error: 'Invalid Trip Id. Please check and try again!' })
             }
         }).catch((error) => {
             console.log(error);
         });
     }
 
+    ViewHomeComponet = () =>
+        <div>
+            <h4>Enter the Trip Id associated with the trip</h4>
+            <br />
+            <h6 style={{ color: 'red' }}>{this.state.error}</h6>
+            <form onSubmit={this.getTripDetails}>
+                <input className="inputPlace form-control" type="number" name="tripId" onChange={(e) => { this.setState({ tripId: e.target.value, error: "" }) }} placeholder="Trip Id" required={true} />
+                <br />
+                <button className="btn btn-dark">Fetch Details</button>
+            </form>
+        </div>
+
+    googlePlaceSearchHandler = (place, e) => {
+        e.preventDefault();
+        const url = 'https://google.com/search?q=' + place + ', ' + this.state.destination;
+        window.open(url, '_blank', 'height=500,width=1400');
+    }
+
+    GooglePlacesComponent = () =>
+        <div>
+            <br />
+            <h6>Tourist attractions!</h6>
+            <br />
+            <div className="grid-container">
+                {this.state.selectedGooglePlaces.map((place, index) => (
+                    <div id="googleGrid" className="card grid-item" key={index} >
+                        <h6>{place.name} {' '}
+                            <a style={{ fontSize: '13px' }} className="btn-link" href='/#' onClick={this.googlePlaceSearchHandler.bind(this, place.name)}>More...</a>
+                        </h6>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+    airbnbRoomSearchHandler = (roomId, e) => {
+        e.preventDefault();
+        const url = 'https://www.airbnb.com/rooms/' + roomId + '?guests=1&adults=1';
+        window.open(url, '_blank', 'height=500,width=1400');
+    }
+
+    AirbnbPlacesComponent = () =>
+        <div>
+            <br />
+            <h6>Airbnb accomodations!</h6>
+            <br />
+            <div className="grid-container">
+                {this.state.selectedAirbnbPlaces.map((lis, index) => (
+                    <div id="airbnbGrid" className="card grid-item" key={index} >
+                        <img className="card-img-top" src={lis.thumb} alt="" />
+                        <h6 className="">{lis.name} </h6>
+                        <h6>${lis.price} per night{' '}
+                            <a style={{ fontSize: '13px' }} className="btn-link" href='/#' onClick={this.airbnbRoomSearchHandler.bind(this, lis.id)}>More...</a>
+                        </h6>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+
+    ShareAndCarComponent = () =>
+        <div>
+            <br />
+            <h6>Trip Share and Car Details</h6>
+            <br />
+            <label style={{ paddingRight: '10px' }}>Estimated share for the Trip (in $) - {this.state.finalTrip.userOtherOptions.userShare}</label>
+            <br />
+            <label style={{ paddingRight: '10px' }}>Going trip via Car - {this.state.finalTrip.userOtherOptions.userHasCar ? 'Yes' : 'No'}</label>
+            <br />
+            <label style={{ paddingRight: '10px' }}>Total number of people can drive through Car - {this.state.finalTrip.userOtherOptions.userCarFit}</label>
+        </div>
+
+    TripHomeComponent = () =>
+        <div>
+            <h4>Finalized Trip Details</h4>
+            <br />
+            <div>
+                <h6>Destination : {this.state.destination}</h6>
+            </div>
+            <div>
+                <br />
+                <h6>Trip Dates</h6>
+                <DayPicker selectedDays={this.state.finalTrip.selectedDays.map((day) => new Date(day))} disabledDays={{ before: new Date() }} />
+            </div>
+        </div>
+
     DisplayLinks = () => <div>
         <div>
-            <div><label>Link to Share : <span>{'localhost:3000' + this.state.selUrl}</span></label></div>
-            <button className="btn btn-link" onClick={() => this.props.history.push(this.state.selUrl)}> Click to Preview</button>
+            <label>Link to Select or Update Options</label>
+            <input className="inputPlace" defaultValue={'http://localhost:3000/select?tripId=' + this.state.tripId} readOnly />
+            <button className="btn btn-link" onClick={() => this.props.history.push(this.state.tripSelectionUrl)}> Click to Preview</button>
         </div>
+    </div>
+
+    DisplayLinksComponent = () =>
         <div>
-            <div><label>Link to View Options : <span>{'localhost:3000' + this.state.optUrl}</span></label></div>
-            <button className="btn btn-link" onClick={() => this.props.history.push(this.state.optUrl)}> Click to See Options</button>
+            <h4>Trip has not yet finalized!</h4>
+            <br />
+            <this.DisplayLinks />
         </div>
-    </div>
 
-    /* onOpenModal = (place) => {
-        //e.preventDefault();
-        this.setState({ open: true, activeItemName: place.name, activeItemId: place.id });
-    };
+    DisplayTripDetails = () =>
+        <div>
+            <this.TripHomeComponent />
+            <this.GooglePlacesComponent />
+            <this.AirbnbPlacesComponent />
+            <this.ShareAndCarComponent />
+        </div>
 
-    onCloseModal = () => {
-        //e.preventDefault();
-        this.setState({ open: false });
-    };
-
-    ModalComponent = () => <div><button className="btn btn-link" onClick={(e) => { e.preventDefault(); this.onOpenModal(place) }}>{place.name}</button>
-        <Modal open={this.state.open} onClose={(e) => { e.preventDefault(); this.onCloseModal() }} center
-            styles={{
-                "overlay": {
-                    background: 'rgba(255,255,255,0.3)'
-                }
-            }}>
-            <h2>{this.state.activeItemName}</h2>
-        </Modal></div> */
-
-    DisplayGroup = () => <div className="list-group-item form-group">
-        {this.state.updatedPlaces.map((place, index) => (
-            <div className="finalTrip" key={index}>
-                <label>
-                    <input
-                        type='checkbox'
-                        checked={this.state.selectedList[place.id]}
-                        readOnly
-                    />
-                    <button className="btn btn-link" onClick={(e) => {
-                        e.preventDefault();
-                        const url = 'https://google.com/search?q=' + place.name;
-                        window.open(url, '_blank', 'height=500,width=1400');
-                    }}>{place.name}</button>
-                </label>
-            </div>
-        ))}
-    </div>
-
-    DisplayDateGroup = () => <div className="list-group-item form-group">
-        {this.state.updatedDays.map((date, index) => (
-            <div className="checkbox" key={index}>
-                <label>
-                    <input
-                        type='checkbox'
-                        checked={this.state.selectedDates[index]}
-                        readOnly
-                    />
-                    {date}
-                </label>
-            </div>
-        ))}
-    </div>
-
-
-    DisplayListingGroup = () => <div className="list-group-item form-group">
-        {this.state.updatedListings.map((lis, index) => (
-            <div className="checkbox" key={index}>
-                <label>
-                    <input
-                        type='checkbox'
-                        checked={this.state.selectedListings[index]}
-                        readOnly
-                    />
-                    {lis.name + ", Price : "} <b>{'$' + lis.price}</b>
-                </label>
-            </div>
-        ))}
-    </div>
-
-    SelectionDisplay = () => <form onSubmit={this.saveSelection}>
-        <h2><label bsStyle="success">Destination : {this.state.place}</label></h2>
-        <br />
-        <label>Trip Organizer : {this.state.owner}</label>
-        <br /><br />
-        <h4><label>List of Near By Places Selected</label></h4>
-        <br />
-        <this.DisplayGroup />
-        <br />
-        <h4><label>List of Dates Selected</label></h4>
-        <br />
-        <this.DisplayDateGroup />
-        <br />
-        <h4><label>List of Housing Options Selected</label></h4>
-        <br />
-        <this.DisplayListingGroup />
-        <br />
-        <h4><label>Trip Share Per Person : <b>{'$' + this.state.userShare}</b> </label></h4>
-        <br />
-        <h4><label>Travel option for the Trip via Car : <b>{this.state.userCar ? 'Yes' : 'No'}</b></label></h4>
-        <br />
-        <this.DisplayLinks />
-        <br />
-    </form>
-
-    DivDisplay = () => this.state.flag ? <this.TripIDForm /> : <div>{!this.state.error ? <this.SelectionDisplay /> : <label>{this.state.error}</label>}</div>
-
-    TripIDForm = () => <form onSubmit={this.fetchTripDetails}>
-        <label>Enter Trip Id</label>
-        <input className="form-control" name="tripId" onChange={(e) => { this.setState({ tripId: e.target.value }) }} placeholder="Trip Id" required={true} />
-        <br />
-        <button className="btn btn-primary">Fetch Details</button>
-    </form>
-
-    fetchTripDetails = (e) => {
-        e.preventDefault();
-        const tripId = this.state.tripId;
-        this.getTripDetails(tripId);
+    switchComponent = (e) => {
+        switch (e) {
+            case 0: return <this.ViewHomeComponet />
+            case 1: return <this.DisplayTripDetails />
+            case 2: return <this.DisplayLinksComponent />
+            default: return <h4>Please <a href="/login" >Login</a></h4>
+        }
     }
 
     render() {
         return (
-            <div style={{ display: "inline" }}>
-                <button className="btn btn-link" onClick={() => this.props.history.goBack()}>Go Back</button>
-                <div className="container jumbotron">
-                    <this.DivDisplay />
+            <div className="jumbotron container" style={styles.divHome}>
+                <div>
+                    {this.switchComponent(this.state.activeStep)}
                 </div>
+                <br /><br />
+                <h6>Proceed to <a href="/">Home</a></h6>
             </div>
         );
     }
 }
 
 export default View;
-
-
-//mongodb+srv://tripo:<PASSWORD>@cluster0-vqpsm.gcp.mongodb.net/test?retryWrites=true
-//https://maps.googleapis.com/maps/api/place/textsearch/json?query=san+francisco+tourist&language=en&key=AIzaSyDiFYXE3HoT8ux5MqVFaeYLDLQcZvhAqqs
