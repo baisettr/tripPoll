@@ -7,6 +7,7 @@ import Propose from './containers/Propose';
 import Select from './containers/Select';
 import View from './containers/View';
 import NavBar from './containers/Nav';
+import Login from './containers/Login';
 
 class App extends Component {
   render() {
@@ -15,6 +16,7 @@ class App extends Component {
         <NavBar />
         <Switch>
           <Route path="/" exact component={Home} />
+          <Route path="/login" component={Login} />
           <Route path="/options" component={Options} />
           <Route path="/propose" component={Propose} />
           <Route path="/select" component={Select} />
