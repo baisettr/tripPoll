@@ -93,18 +93,18 @@ function trip(tripId, callback) {
 
 // mlab save trip options
 app.post('/tripOptions', function (req, res) {
-    console.log(req.body.options);
+    console.log(req.body.data);
     console.log(req.body.tripId);
     const tripId = req.body.tripId;
-    const options = req.body.options;
-    tripOptionsSave(tripId, options, (data) => {
+    const tripOptions = req.body.data;
+    tripOptionsSave(tripId, tripOptions, (data) => {
         res.send(data);
     })
 })
 
-function tripOptionsSave(tripId, options, callback) {
+function tripOptionsSave(tripId, tripOptions, callback) {
     const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips/' + tripId + '?apiKey=' + keys.mlabAPIKey;
-    axios.put(url, { "$set": { "options": options } }
+    axios.put(url, { "$set": { "tripSelectedOptions": tripOptions } }
     ).then((res) => {
         //console.log(res.data);
         return callback(res.data);
@@ -187,6 +187,7 @@ app.get('/listings', function (req, res) {
     getL(dest)
         .then((data) => {
             console.log("res");
+            console.log(JSON.stringify(data.search_results));
             res.send(data);
         })
         .catch((e) => { console.log("error"); console.log(e) })
@@ -211,7 +212,7 @@ function getL(place) {
         url: 'https://api.airbnb.com/v2/search_results/',
         headers: headers,
         qs: {
-            '_limit': 10,
+            '_limit': 12,
             '_offset': 0,
             'locale': 'en-US',
             'location': place,
