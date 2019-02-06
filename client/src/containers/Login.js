@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom';
 import axios from 'axios';
 
 const styles = {
@@ -26,7 +27,8 @@ class Login extends Component {
             const userLogin = res.data;
             if (userLogin.status) {
 
-                this.setState({ activeStep: 1, userDetails: {} });
+                this.setState({ isSignedIn: true, userDetails: {} });
+                //this.props.history.push('/');
 
             } else {
                 this.setState({ error: 'Invalid Credentianls. Please check and try again!' })
@@ -98,8 +100,13 @@ class Login extends Component {
     }
 
     render() {
+        let redirect = null;
+        if (this.state.isSignedIn) {
+            redirect = <Redirect to="/" />;
+        }
         return (
             <div className="jumbotron container" style={styles.divHome} style={{ position: "relative" }}>
+                {redirect}
                 <div>
                     {this.switchComponent(this.state.actionStep)}
                 </div>
