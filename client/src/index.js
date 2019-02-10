@@ -5,6 +5,10 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+/* const userAuth = localStorage.getItem('userAuth');
+const userToken = localStorage.getItem('userToken');
+const user = { userAuth, userToken }; */
+
 const app = (
     <BrowserRouter>
         <App />
