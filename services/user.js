@@ -8,8 +8,9 @@ function userSignUp(userDetails) {
         const url = 'https://api.mlab.com/api/1/databases/tripo/collections/users?apiKey=' + keys.mlabAPIKey;
         axios.post(url, userDetails)
             .then((res) => {
-                console.log(res.data);
+                //console.log(res.data);
                 if (res.data) {
+                    console.log("success sign up");
                     const user = { userId: res.data.userId, userOId: res.data._id.$oid }
                     const token = jwt.sign(user, keys.jwtKey, { algorithm: 'HS256', expiresIn: 60 * 60 });
                     resolve(token);
@@ -29,10 +30,9 @@ function userSignIn(userDetails) {
         const url = 'https://api.mlab.com/api/1/databases/tripo/collections/users?apiKey=' + keys.mlabAPIKey + '&q={"userEmail":' + userEmail + '}';;
         axios.get(url)
             .then((res) => {
-                console.log(res.data);
-                const userFullDetails = res.data[0];
-                if (userFullDetails.length !== 0) {
-                    if (userFullDetails.password === userDetails.password) {
+                if (res.data.length) {
+                    const userFullDetails = res.data[0];
+                    if (userFullDetails.userPassword === userDetails.userPassword) {
                         console.log("success");
                         const user = { userId: userFullDetails.userId, userOId: userFullDetails._id.$oid }
                         const token = jwt.sign(user, keys.jwtKey, { algorithm: 'HS256', expiresIn: 60 * 60 });
@@ -56,10 +56,10 @@ function userDetails(userDetails) {
         const url = 'https://api.mlab.com/api/1/databases/tripo/collections/users/' + userOId + '?apiKey=' + keys.mlabAPIKey;
         axios.get(url)
             .then((res) => {
-                console.log(res.data);
+                //console.log(res.data);
                 const userFullDetails = res.data;
                 if (userFullDetails.length !== 0) {
-                    console.log("success");
+                    console.log("success user details");
                     const user = { userName: userFullDetails.userName, userEmail: userFullDetails.userEmail }
                     resolve(user);
                 } else {

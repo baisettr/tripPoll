@@ -3,7 +3,7 @@ const checkUserAuth = require('../services/auth');
 
 module.exports = app => {
     app.post('/userSignUp', (req, res) => {
-        const userDetails = req.body.userDetails;
+        const userDetails = req.body.data;
         auth.userSignUp(userDetails)
             .then((token) => {
                 res.status(200).json({ token });
@@ -14,7 +14,7 @@ module.exports = app => {
     });
 
     app.post('/userSignIn', (req, res) => {
-        const userDetails = req.body.userDetails;
+        const userDetails = req.body.data;
         auth.userSignIn(userDetails)
             .then((token) => {
                 res.status(200).json({ token });
