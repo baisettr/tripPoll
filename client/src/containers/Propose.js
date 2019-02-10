@@ -185,8 +185,6 @@ class Propose extends Component {
             <h4>Trip Successful! Share with friends...</h4>
             <br />
             <this.DisplayLinks />
-            <br />
-            <h6>Proceed to <a href="/">Home</a></h6>
         </div>
 
     handleGoogleClick = (place, e) => {
