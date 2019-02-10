@@ -3,6 +3,12 @@
   display: block;
 }
 
+.divHome {
+  background-color: rgba(255, 255, 255);
+  text-align: center;
+  margin-top: 15px;
+}
+
 .jumbotron{
   background-color: white;
   }
