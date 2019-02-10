@@ -1,40 +1,61 @@
 import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
 import axios from 'axios';
-
-const styles = {
-    divHome: {
-        backgroundColor: "rgba(255, 255, 255)",
-        textAlign: 'center',
-        marginTop: '15px'
-    }
-}
 
 class Login extends Component {
     constructor(props) {
         super(props);
-        this.state = { isSignedIn: false, userId: "", userPassword: "", error: '', userDetails: {}, actionStep: 0 };
+        this.state = { isSignedIn: false, userName: "", userEmail: "", userId: "", userPassword: "", error: '', userDetails: {}, actionStep: 0 };
     }
 
-    userAuthentication = (e) => {
+    userSignIn = (e) => {
         e.preventDefault();
-        const userId = this.state.userId;
+        const userEmail = this.state.userEmail;
         const userPassword = this.state.userPassword;
-        const userCredentials = { userId, userPassword };
-        const url = '/userLogin';
+        const userCredentials = { userEmail, userPassword };
+        const url = '/userSignIn';
         axios.post(url, { data: userCredentials }
         ).then((res) => {
-            const userLogin = res.data;
-            if (userLogin.status) {
-
-                this.setState({ isSignedIn: true, userDetails: {} });
-                //this.props.history.push('/');
-
-            } else {
-                this.setState({ error: 'Invalid Credentianls. Please check and try again!' })
-            }
+            const userToken = res.data.token;
+            localStorage.setItem('userAuth', true);
+            localStorage.setItem('userToken', userToken);
+            //this.props.history.push('/', this.state)
+            this.setState({ isSignedIn: true });
+            this.props.loginChange(true);
         }).catch((error) => {
-            console.log(error);
+            const message = error.response.data.message;
+            this.setState({ error: message });
+        });
+    }
+
+    userSignUp = (e) => {
+        e.preventDefault();
+        const userName = this.state.userName;
+        const userEmail = this.state.userEmail;
+        const userPassword = this.state.userPassword;
+        const userDetails = { userName, userEmail, userPassword };
+        const url = '/userSignUp';
+        axios.post(url, { data: userDetails }
+        ).then((res) => {
+            const userToken = res.data.token;
+            localStorage.setItem('userAuth', true);
+            localStorage.setItem('userToken', userToken);
+            this.setState({ isSignedIn: true });
+        }).catch((error) => {
+            const message = error.response.data.message;
+            this.setState({ error: message });
+        });
+    }
+
+    userDetails = (e) => {
+        e.preventDefault();
+        const userToken = localStorage.userToken;
+        const headers = { Authorization: 'Bearer ' + userToken };
+        const url = '/userDetails';
+        axios.get(url, { headers }
+        ).then((res) => {
+            console.log(res.data);
+        }).catch((error) => {
+            console.log(error.response.data);
         });
     }
 
@@ -52,9 +73,9 @@ class Login extends Component {
             <br />
             <h6 style={{ color: 'red' }}>{this.state.error}</h6>
             <div >
-                <form onSubmit={this.userAuthentication} >
-                    <label className="inputLabel">Username</label>
-                    <input className="inputLogin" onChange={(e) => { this.setState({ userId: e.target.value, error: "" }) }} placeholder="enter username" required={true} />
+                <form onSubmit={this.userSignIn} >
+                    <label className="inputLabel">Email Id</label>
+                    <input className="inputLogin" onChange={(e) => { this.setState({ userEmail: e.target.value, error: "" }) }} placeholder="enter username" required={true} />
                     <br />
                     <label className="inputLabel">Password</label>
                     <input className="inputLogin" type="password" onChange={(e) => { this.setState({ userPassword: e.target.value, error: "" }) }} placeholder="enter password" required={true} />
@@ -73,12 +94,12 @@ class Login extends Component {
             <br />
             <h6 style={{ color: 'red' }}>{this.state.error}</h6>
             <div >
-                <form onSubmit={this.userAuthentication} >
-                    <label className="inputLabel">Username</label>
-                    <input className="inputLogin" onChange={(e) => { this.setState({ userId: e.target.value, error: "" }) }} placeholder="enter username" required={true} />
+                <form onSubmit={this.userSignUp} >
+                    <label className="inputLabel">Full Name</label>
+                    <input className="inputLogin" onChange={(e) => { this.setState({ userName: e.target.value, error: "" }) }} placeholder="enter username" required={true} />
                     <br />
                     <label className="inputLabel">Email Id</label>
-                    <input className="inputLogin" onChange={(e) => { this.setState({ userId: e.target.value, error: "" }) }} placeholder="enter email" required={true} />
+                    <input className="inputLogin" onChange={(e) => { this.setState({ userEmail: e.target.value, error: "" }) }} placeholder="enter email" required={true} />
                     <br />
                     <label className="inputLabel">Password</label>
                     <input className="inputLogin" type="password" onChange={(e) => { this.setState({ userPassword: e.target.value, error: "" }) }} placeholder="enter password" required={true} />
@@ -100,20 +121,18 @@ class Login extends Component {
     }
 
     render() {
-        let redirect = null;
+        /* let redirect = null;
         if (this.state.isSignedIn) {
-            redirect = <Redirect to="/" />;
-        }
+            redirect = <Redirect to={{ pathname: '/', state: this.state }} />;
+        } //{redirect} */
         return (
-            <div className="jumbotron container" style={styles.divHome} style={{ position: "relative" }}>
-                {redirect}
+            <div className="jumbotron container divHome">
+
                 <div>
                     {this.switchComponent(this.state.actionStep)}
                 </div>
-                <br />
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, paddingBottom: '10px' }}>
-                    <h6>Proceed to <a href="/">Home</a></h6>
-                </div>
+                <br /><br />
+                <h6>Proceed to <a href="/">Home</a></h6>
             </div>
         );
     }
