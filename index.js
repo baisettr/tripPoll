@@ -7,8 +7,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 require('./routes/auth')(app);
-//require('./routes/places')(app);
-//require('./routes/trip')(app);
+require('./routes/places')(app);
+require('./routes/trip')(app);
 
 if (process.env.NOD_ENV === 'production') {
     app.use(express.static('client/build'));
