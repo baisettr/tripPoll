@@ -13,7 +13,6 @@ const NavBarComponent = (props) => {
                     <Nav className="mr-auto">
                         <Link className="nav-link" to="/propose">Propose</Link>
                         <Link className="nav-link" to="/view">View</Link>
-                        <Link className="nav-link" to="/select">Select Options</Link>
                         <NavDropdown title="Trips" id="collasible-nav-dropdown">
                             <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
                             <NavDropdown.Item href="#action/3.2">Another action</NavDropdown.Item>

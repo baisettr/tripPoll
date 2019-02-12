@@ -14,7 +14,21 @@ const styles = {
 class View extends Component {
     constructor(props) {
         super(props);
-        this.state = { error: "", tripId: "", finalTrip: {}, activeStep: 0, destination: "", selectedAirbnbPlaces: [], selectedGooglePlaces: [], listAirbnbPlaces: [], listGooglePlaces: [] };
+        const tripId = props.location.search.split('=')[1];
+        this.state = { error: "", tripId: tripId, finalTrip: {}, activeStep: 0, destination: "", selectedAirbnbPlaces: [], selectedGooglePlaces: [], listAirbnbPlaces: [], listGooglePlaces: [] };
+    }
+
+    componentDidMount() {
+        const query = new URLSearchParams(this.props.location.search);
+        const queryParams = {};
+        for (let param of query.entries()) {
+            queryParams[param[0]] = param[1];
+        }
+        const tripId = queryParams["tripId"];
+        console.log(tripId);
+        if (tripId) {
+            this.setState({ tripId: tripId });
+        }
     }
 
     getTripDetails = (e) => {
@@ -22,7 +36,9 @@ class View extends Component {
         const tripId = this.state.tripId;
 
         const url = '/trip?tripId=' + tripId;
-        axios.get(url,
+        const userToken = localStorage.userToken;
+        const headers = { Authorization: 'Bearer ' + userToken };
+        axios.get(url, { headers }
         ).then((res) => {
 
             const trip = res.data[0];
@@ -60,7 +76,7 @@ class View extends Component {
             <br />
             <h6 style={{ color: 'red' }}>{this.state.error}</h6>
             <form onSubmit={this.getTripDetails}>
-                <input className="inputPlace form-control" type="number" name="tripId" onChange={(e) => { this.setState({ tripId: e.target.value, error: "" }) }} placeholder="Trip Id" required={true} />
+                <input className="inputPlace form-control" type="number" name="tripId" defaultValue={this.state.tripId} onChange={(e) => { this.setState({ tripId: e.target.value, error: "" }) }} placeholder="Trip Id" required={true} />
                 <br />
                 <button className="btn btn-dark">Fetch Details</button>
             </form>

@@ -99,8 +99,10 @@ class Propose extends Component {
     }
 
     saveNewTrip = (trip) => {
-        const url = '/newTrip';
-        axios.post(url, { data: trip }
+        const url = '/tripNew';
+        const userToken = localStorage.userToken;
+        const headers = { Authorization: 'Bearer ' + userToken };
+        axios.post(url, { data: trip }, { headers }
         ).then((res) => {
             console.log("Saved");
             console.log(res.data);

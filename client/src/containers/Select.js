@@ -31,8 +31,10 @@ class Select extends Component {
     }
 
     getTripDetails = (tripId) => {
+        const userToken = localStorage.userToken;
+        const headers = { Authorization: 'Bearer ' + userToken };
         const url = '/trip?tripId=' + tripId;
-        axios.get(url,
+        axios.get(url, { headers }
         ).then((res) => {
             const trip = res.data[0];
             const { _id, tripDestination, tripSelectedDays, tripListGooglePlaces, tripListAirbnbPlaces, tripSelectedOptions } = trip;
@@ -123,7 +125,9 @@ class Select extends Component {
 
     saveTripOptions = (tripOptions) => {
         const url = '/tripOptions';
-        axios.post(url, { tripId: this.state.tripOId, data: tripOptions }
+        const userToken = localStorage.userToken;
+        const headers = { Authorization: 'Bearer ' + userToken };
+        axios.post(url, { tripId: this.state.tripOId, data: tripOptions }, { headers }
         ).then((res) => {
             console.log("Options Saved");
             console.log(res.data);
