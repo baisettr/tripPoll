@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const styles = {
     divHome: {
@@ -12,17 +13,40 @@ const styles = {
 class Home extends Component {
     constructor(props) {
         super(props);
-        this.state = { actionStep: 0 }
+        this.state = { actionStep: 0, myTrips: [], friendTrips: [] }
     }
 
     myTripsClickHandler = (e) => {
         e.preventDefault();
-        this.setState({ actionStep: 1 });
+
+        const url = '/myTrips';
+        const userToken = localStorage.userToken;
+        const headers = { Authorization: 'Bearer ' + userToken };
+        axios.get(url, { headers }
+        ).then((res) => {
+            //console.log(res.data)
+            this.setState({ actionStep: 1, myTrips: res.data });
+        }).catch((error) => {
+            console.log(error);
+        });
     }
+
     friendsTripsClickHandler = (e) => {
         e.preventDefault();
-        this.setState({ actionStep: 2 });
+
+        const url = '/myTrips';
+        const userToken = localStorage.userToken;
+        const headers = { Authorization: 'Bearer ' + userToken };
+        axios.get(url, { headers }
+        ).then((res) => {
+            console.log(res.data)
+            this.setState({ actionStep: 2, myTrips: res.data });
+        }).catch((error) => {
+            console.log(error);
+        });
+
     }
+
     HomeClickHandler = (e) => {
         e.preventDefault();
         this.setState({ actionStep: 0 });
@@ -36,13 +60,13 @@ class Home extends Component {
                     <div className="card-title">My Trips</div>
                     <div className="card-body">
                         <h6>Plan a new trip {' '}
-                            <a className="btn-link" href="/propose">Propose a Trip</a>
+                            <Link className="btn-link" to="/propose">Propose a Trip</Link>
                         </h6>
                         <h6>Your planned trips {' '}
                             <a className="btn-link" href="/#" onClick={this.myTripsClickHandler.bind(this)}>My Trips</a>
                         </h6>
                         <h6>Check a trip status {' '}
-                            <a className="btn-link" href="/view">View a Trip</a>
+                            <Link className="btn-link" to="/view">View a Trip</Link>
                         </h6>
                     </div>
                 </div>
@@ -68,29 +92,32 @@ class Home extends Component {
             </div>
         </div>
 
+    selectTripClickHandler = (tripId) => {
+        const url = '/select?tripId=' + tripId;
+        this.props.history.push(url);
+    }
+
+    viewTripClickHandler = (tripId) => {
+        const url = '/view?tripId=' + tripId;
+        this.props.history.push(url);
+    }
+
     MyTripsComponent = () =>
         <div className="jumbotron container" style={styles.divHome}>
             <h4>My Trips</h4>
 
             <div className="grid-container-home">
-                <div className="grid-item-home">
-                    <div style={{ display: 'inline-block' }} className="d-flex justify-content-between">
-                        <h6 style={{ display: 'inline-block' }}>City : San Francisco, CA People : 4</h6>
-                        <div style={{ display: 'inline-block' }} >
-                            <button className="btn btn-light">Edit</button> | {' '}
-                            <button className="btn btn-dark" >Finalize</button>
+                {this.state.myTrips.map((trip, index) => (
+                    <div className="grid-item-home" key={index}>
+                        <div style={{ display: 'inline-block' }} className="d-flex justify-content-between">
+                            <h6 style={{ display: 'inline-block' }}>{trip.tripId} - {trip.tripDestination}</h6>
+                            <div style={{ display: 'inline-block' }} >
+                                <button className="btn btn-light" onClick={this.viewTripClickHandler.bind(this, trip.tripId)}>View</button> | {' '}
+                                <button className="btn btn-dark" >Finalize</button>
+                            </div>
                         </div>
                     </div>
-                </div><div className="grid-item-home">
-                    <div style={{ display: 'inline-block' }} className="d-flex justify-content-between">
-                        <h6 style={{ display: 'inline-block' }}>City : San Francisco, CA</h6>
-                        <h6 style={{ display: 'inline-block' }}>People : 4</h6>
-                        <div style={{ display: 'inline-block' }} >
-                            <button className="btn btn-light">Edit</button> | {' '}
-                            <button className="btn btn-dark" >Finalize</button>
-                        </div>
-                    </div>
-                </div>
+                ))}
             </div>
             <br />
             <h6>Proceed to <a href="/#" onClick={this.HomeClickHandler.bind(this)}>Home</a></h6>
@@ -101,24 +128,17 @@ class Home extends Component {
             <h4>Friend's Trips</h4>
 
             <div className="grid-container-home">
-                <div className="grid-item-home">
-                    <div style={{ display: 'inline-block' }} className="d-flex justify-content-between">
-                        <h6 style={{ display: 'inline-block' }}>City : San Francisco, CA People : 4</h6>
-                        <div style={{ display: 'inline-block' }} >
-                            <button className="btn btn-light">View Final Trip</button> | {' '}
-                            <button className="btn btn-dark" >Select Options</button>
+                {this.state.myTrips.map((trip, index) => (
+                    <div className="grid-item-home" key={index}>
+                        <div style={{ display: 'inline-block' }} className="d-flex justify-content-between">
+                            <h6 style={{ display: 'inline-block' }}>{trip.tripId} - {trip.tripDestination}</h6>
+                            <div style={{ display: 'inline-block' }} >
+                                <button className="btn btn-light" onClick={this.viewTripClickHandler.bind(this, trip.tripId)}>View Final Trip</button> | {' '}
+                                <button className="btn btn-dark" onClick={this.selectTripClickHandler.bind(this, trip.tripId)}>Select Options</button>
+                            </div>
                         </div>
                     </div>
-                </div><div className="grid-item-home">
-                    <div style={{ display: 'inline-block' }} className="d-flex justify-content-between">
-                        <h6 style={{ display: 'inline-block' }}>City : San Francisco, CA</h6>
-                        <h6 style={{ display: 'inline-block' }}>People : 4</h6>
-                        <div style={{ display: 'inline-block' }} >
-                            <button className="btn btn-light">View Final Trip</button> | {' '}
-                            <button className="btn btn-dark" >Select Options</button>
-                        </div>
-                    </div>
-                </div>
+                ))}
             </div>
             <br />
             <h6>Proceed to <a href="/#" onClick={this.HomeClickHandler.bind(this)}>Home</a></h6>
