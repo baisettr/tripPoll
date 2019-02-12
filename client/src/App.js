@@ -19,14 +19,23 @@ class App extends Component {
   }
 
   componentDidMount() {
+    const userExpiration = new Date(localStorage.getItem('userExpiration'));
+    const userSetTimeout = userExpiration.getTime() - new Date().getTime();
     this.authCheckState();
+    setTimeout(this.authCheckState, userSetTimeout);
   }
 
   authCheckState = () => {
-    const userAuth = localStorage.getItem('userAuth');
-    const userToken = localStorage.getItem('userToken');
-    if (userToken !== null && userAuth === 'true') {
+    const userExpiration = new Date(localStorage.getItem('userExpiration'));
+    if (userExpiration > new Date()) {
+      const userToken = localStorage.getItem('userToken');
+      const userAuth = true;
       this.setState({ userAuth, userToken });
+    } else {
+      const userAuth = false;
+      localStorage.removeItem('userExpiration');
+      localStorage.removeItem('userToken');
+      this.setState({ userAuth });
     }
   }
 
@@ -42,6 +51,9 @@ class App extends Component {
   }
 
   LoginChangeHandler = (e) => {
+    const userExpiration = new Date(localStorage.getItem('userExpiration'));
+    const userSetTimeout = userExpiration.getTime() - new Date().getTime();
+    setTimeout(this.authCheckState, userSetTimeout);
     this.setState({ userAuth: e });
   }
 

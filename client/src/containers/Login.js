@@ -16,7 +16,8 @@ class Login extends Component {
         axios.post(url, { data: userCredentials }
         ).then((res) => {
             const userToken = res.data.token;
-            localStorage.setItem('userAuth', true);
+            const userExpiration = new Date(new Date().getTime() + 59 * 60 * 1000);
+            localStorage.setItem('userExpiration', userExpiration);
             localStorage.setItem('userToken', userToken);
             //this.props.history.push('/', this.state)
             this.setState({ isSignedIn: true });
@@ -37,9 +38,11 @@ class Login extends Component {
         axios.post(url, { data: userDetails }
         ).then((res) => {
             const userToken = res.data.token;
-            localStorage.setItem('userAuth', true);
+            const userExpiration = new Date(new Date().getTime() + 60 * 60 * 1000);
+            localStorage.setItem('userExpiration', userExpiration);
             localStorage.setItem('userToken', userToken);
             this.setState({ isSignedIn: true });
+            this.props.loginChange(true);
         }).catch((error) => {
             const message = error.response.data.message;
             this.setState({ error: message });
