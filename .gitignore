@@ -69,3 +69,5 @@ package-lock.json
 
 dev.js
 prod.js
+
+legacy/
