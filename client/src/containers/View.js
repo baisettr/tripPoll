@@ -25,57 +25,57 @@ class View extends Component {
             queryParams[param[0]] = param[1];
         }
         const tripId = queryParams["tripId"];
-        console.log(tripId);
         if (tripId) {
-            this.setState({ tripId: tripId });
+            this.setState({ tripId, activeStep: 3 });
+            this.getTripDetails(tripId);
         }
     }
 
-    getTripDetails = (e) => {
-        e.preventDefault();
-        const tripId = this.state.tripId;
-
+    getTripDetails = (tripId) => {
         const url = '/trip?tripId=' + tripId;
         const userToken = localStorage.userToken;
         const headers = { Authorization: 'Bearer ' + userToken };
         axios.get(url, { headers }
         ).then((res) => {
+            const trip = res.data;
+            if (trip.finalTrip) {
+                const { finalTrip, tripDestination, tripListGooglePlaces, tripListAirbnbPlaces } = trip;
+                let selectedGooglePlaces = [];
+                for (const i in tripListGooglePlaces) {
+                    const place = tripListGooglePlaces[i];
+                    if (finalTrip.selectedGooglePlaces[place.id] === 1) {
+                        selectedGooglePlaces.push(place);
+                    }
+                };
+                let selectedAirbnbPlaces = [];
+                for (const i in tripListAirbnbPlaces) {
+                    const room = tripListAirbnbPlaces[i];
+                    if (finalTrip.selectedAirbnbPlaces[room.id] === 1) {
+                        selectedAirbnbPlaces.push(room);
+                    }
+                };
 
-            const trip = res.data[0];
-            if (trip) {
-                if (trip.finalTrip) {
-                    const { finalTrip, tripDestination, tripListGooglePlaces, tripListAirbnbPlaces } = trip;
-                    let selectedGooglePlaces = [];
-                    for (const i in tripListGooglePlaces) {
-                        const place = tripListGooglePlaces[i];
-                        if (finalTrip.selectedGooglePlaces[place.id] === 1) {
-                            selectedGooglePlaces.push(place);
-                        }
-                    };
-                    let selectedAirbnbPlaces = [];
-                    for (const i in tripListAirbnbPlaces) {
-                        const room = tripListAirbnbPlaces[i];
-                        if (finalTrip.selectedAirbnbPlaces[room.id] === 1) {
-                            selectedAirbnbPlaces.push(room);
-                        }
-                    };
-
-                    this.setState({ activeStep: 1, destination: tripDestination, listGooglePlaces: tripListGooglePlaces, listAirbnbPlaces: tripListAirbnbPlaces, selectedAirbnbPlaces, selectedGooglePlaces, finalTrip });
-                } else { this.setState({ activeStep: 2 }); }
-            } else {
-                this.setState({ error: 'Invalid Trip Id. Please check and try again!' })
-            }
+                this.setState({ activeStep: 1, destination: tripDestination, listGooglePlaces: tripListGooglePlaces, listAirbnbPlaces: tripListAirbnbPlaces, selectedAirbnbPlaces, selectedGooglePlaces, finalTrip });
+            } else { this.setState({ activeStep: 2 }); }
         }).catch((error) => {
-            console.log(error);
+            const message = error.response.data.message;
+            this.setState({ error: message, activeStep: 0 })
         });
     }
 
-    ViewHomeComponet = () =>
+    getTripDetailsFromUserInput = (e) => {
+        e.preventDefault();
+        this.setState({ activeStep: 3 });
+        const tripId = this.state.tripId;
+        this.getTripDetails(tripId);
+    }
+
+    ViewHomeComponent = () =>
         <div>
             <h4>Enter the Trip Id associated with the trip</h4>
             <br />
             <h6 style={{ color: 'red' }}>{this.state.error}</h6>
-            <form onSubmit={this.getTripDetails}>
+            <form onSubmit={this.getTripDetailsFromUserInput}>
                 <input className="inputPlace form-control" type="number" name="tripId" defaultValue={this.state.tripId} onChange={(e) => { this.setState({ tripId: e.target.value, error: "" }) }} placeholder="Trip Id" required={true} />
                 <br />
                 <button className="btn btn-dark">Fetch Details</button>
@@ -178,11 +178,14 @@ class View extends Component {
             <this.ShareAndCarComponent />
         </div>
 
+    SpinComponent = () => <div className='Loader'>Loading...</div>
+
     switchComponent = (e) => {
         switch (e) {
-            case 0: return <this.ViewHomeComponet />
+            case 0: return <this.ViewHomeComponent />
             case 1: return <this.DisplayTripDetails />
             case 2: return <this.DisplayLinksComponent />
+            case 3: return <this.SpinComponent />
             default: return <h4>Please <a href="/login" >Login</a></h4>
         }
     }
