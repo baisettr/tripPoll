@@ -9,6 +9,7 @@ class Login extends Component {
 
     userSignIn = (e) => {
         e.preventDefault();
+        this.setState({ actionStep: 2 });
         const userEmail = this.state.userEmail;
         const userPassword = this.state.userPassword;
         const userCredentials = { userEmail, userPassword };
@@ -24,12 +25,13 @@ class Login extends Component {
             this.props.loginChange(true);
         }).catch((error) => {
             const message = error.response.data.message;
-            this.setState({ error: message });
+            this.setState({ error: message, actionStep: 0 });
         });
     }
 
     userSignUp = (e) => {
         e.preventDefault();
+        this.setState({ actionStep: 2 });
         const userName = this.state.userName;
         const userEmail = this.state.userEmail;
         const userPassword = this.state.userPassword;
@@ -45,7 +47,7 @@ class Login extends Component {
             this.props.loginChange(true);
         }).catch((error) => {
             const message = error.response.data.message;
-            this.setState({ error: message });
+            this.setState({ error: message, actionStep: 1 });
         });
     }
 
@@ -78,10 +80,10 @@ class Login extends Component {
             <div >
                 <form onSubmit={this.userSignIn} >
                     <label className="inputLabel">Email Id</label>
-                    <input className="inputLogin" onChange={(e) => { this.setState({ userEmail: e.target.value, error: "" }) }} placeholder="enter username" required={true} />
+                    <input className="inputLogin" defaultValue={this.state.userEmail} onChange={(e) => { this.setState({ userEmail: e.target.value, error: "" }) }} placeholder="enter username" required={true} />
                     <br />
                     <label className="inputLabel">Password</label>
-                    <input className="inputLogin" type="password" onChange={(e) => { this.setState({ userPassword: e.target.value, error: "" }) }} placeholder="enter password" required={true} />
+                    <input className="inputLogin" type="password" defaultValue={this.state.userPassword} onChange={(e) => { this.setState({ userPassword: e.target.value, error: "" }) }} placeholder="enter password" required={true} />
                     <br />
                     <button className="btn btn-dark">Sign In</button>
                 </form>
@@ -99,13 +101,13 @@ class Login extends Component {
             <div >
                 <form onSubmit={this.userSignUp} >
                     <label className="inputLabel">Full Name</label>
-                    <input className="inputLogin" onChange={(e) => { this.setState({ userName: e.target.value, error: "" }) }} placeholder="enter username" required={true} />
+                    <input className="inputLogin" defaultValue={this.state.userName} onChange={(e) => { this.setState({ userName: e.target.value, error: "" }) }} placeholder="enter username" required={true} />
                     <br />
                     <label className="inputLabel">Email Id</label>
-                    <input className="inputLogin" onChange={(e) => { this.setState({ userEmail: e.target.value, error: "" }) }} placeholder="enter email" required={true} />
+                    <input className="inputLogin" defaultValue={this.state.userEmail} onChange={(e) => { this.setState({ userEmail: e.target.value, error: "" }) }} placeholder="enter email" required={true} />
                     <br />
                     <label className="inputLabel">Password</label>
-                    <input className="inputLogin" type="password" onChange={(e) => { this.setState({ userPassword: e.target.value, error: "" }) }} placeholder="enter password" required={true} />
+                    <input className="inputLogin" type="password" defaultValue={this.state.userPassword} onChange={(e) => { this.setState({ userPassword: e.target.value, error: "" }) }} placeholder="enter password" required={true} />
                     <br />
                     <button className="btn btn-dark">Sign Up</button>
                 </form>
@@ -114,11 +116,13 @@ class Login extends Component {
             <h6>Please <a href="/#" onClick={this.SignInShowHandler.bind(this)}>SignIn</a> if you already have an account!</h6>
         </div>
 
+    SpinComponent = () => <div className='Loader'>Loading...</div>
 
     switchComponent = (e) => {
         switch (e) {
             case 0: return <this.LoginComponent />
             case 1: return <this.SignUpComponent />
+            case 2: return <this.SpinComponent />
             default: return <h4>Please <a href="/login" >Login</a></h4>
         }
     }
