@@ -21,8 +21,8 @@ function getTrip(tripId) {
         const url = 'https://api.mlab.com/api/1/databases/tripo/collections/trips?apiKey=' + keys.mlabAPIKey + '&q={"tripId":' + tripId + '}';
         axios.get(url)
             .then((res) => {
-                if (res.data) {
-                    resolve(res.data);
+                if (res.data.length) {
+                    resolve(res.data[0]);
                 } else {
                     reject("Invalid Trip. Please check and try again!");
                 };
