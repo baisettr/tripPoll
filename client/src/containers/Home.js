@@ -18,7 +18,7 @@ class Home extends Component {
 
     myTripsClickHandler = (e) => {
         e.preventDefault();
-
+        this.setState({ actionStep: 3 });
         const url = '/myTrips';
         const userToken = localStorage.userToken;
         const headers = { Authorization: 'Bearer ' + userToken };
@@ -33,7 +33,7 @@ class Home extends Component {
 
     friendsTripsClickHandler = (e) => {
         e.preventDefault();
-
+        this.setState({ actionStep: 3 });
         const url = '/myTrips';
         const userToken = localStorage.userToken;
         const headers = { Authorization: 'Bearer ' + userToken };
@@ -102,6 +102,11 @@ class Home extends Component {
         this.props.history.push(url);
     }
 
+    finalizeTripClickHandler = (tripId) => {
+        const url = '/final?tripId=' + tripId;
+        this.props.history.push(url);
+    }
+
     MyTripsComponent = () =>
         <div className="jumbotron container" style={styles.divHome}>
             <h4>My Trips</h4>
@@ -113,7 +118,7 @@ class Home extends Component {
                             <h6 style={{ display: 'inline-block' }}>{trip.tripId} - {trip.tripDestination}</h6>
                             <div style={{ display: 'inline-block' }} >
                                 <button className="btn btn-light" onClick={this.viewTripClickHandler.bind(this, trip.tripId)}>View</button> | {' '}
-                                <button className="btn btn-dark" >Finalize</button>
+                                <button className="btn btn-dark" onClick={this.finalizeTripClickHandler.bind(this, trip.tripId)}>Finalize</button>
                             </div>
                         </div>
                     </div>
@@ -144,11 +149,14 @@ class Home extends Component {
             <h6>Proceed to <a href="/#" onClick={this.HomeClickHandler.bind(this)}>Home</a></h6>
         </div>
 
+    SpinComponent = () => <div className='Loader divHome'>Loading...</div>
+
     switchComponent = (e) => {
         switch (e) {
             case 0: return ""
             case 1: return <this.MyTripsComponent />
             case 2: return <this.FriendsTripsComponent />
+            case 3: return <this.SpinComponent />
             default: return <h4>Please <a href="/login">Login</a> Have a Nice Day!</h4>
         }
     }
