@@ -1,8 +1,8 @@
 import React, { Component, Suspense } from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Route, Switch, Redirect, Link } from 'react-router-dom';
 import './App.css';
 import Home from './containers/Home';
-import Options from './containers/Options';
+import Final from './containers/Final';
 import Propose from './containers/Propose';
 import Select from './containers/Select';
 import View from './containers/View';
@@ -30,6 +30,7 @@ class App extends Component {
     if (userExpiration > new Date()) {
       const userToken = localStorage.getItem('userToken');
       const userAuth = true;
+      //const userName = JSON.parse(window.atob(userToken.split('.')[1])).userName;
       this.setState({ userAuth, userToken });
     } else {
       const userAuth = false;
@@ -43,6 +44,14 @@ class App extends Component {
     return (
       <div className="jumbotron container divHome">
         <h4>Trip Poll - Plan before you ride!</h4>
+      </div>)
+  }
+
+  HandleLoginComponent = () => {
+    return (
+      <div className="jumbotron container divHome">
+        <h4>Trip Poll - Plan before you ride!</h4>
+        <h6>Please <Link to="/login">Login</Link></h6>
       </div>)
   }
 
@@ -60,20 +69,22 @@ class App extends Component {
   RouteComponent = () =>
     <React.Fragment>{this.state.userAuth ?
       <Switch>
-        <Route path="/" exact component={Home} />
+        <Route exact path="/" component={Home} />
         <Route path="/dashboard" component={Home} />
-        <Route path="/options" component={Options} />
+        <Route path="/final" component={Final} />
         <Route path="/propose" component={Propose} />
         <Route path="/select" component={Select} />
         <Route path="/view" component={View} />
         <Route path="/logout" render={(props) => <Logout logoutChange={this.LogoutChangeHandler} />} />
-        <Redirect to="/" />
+        <Route render={() => <Home />} />
+        {/* <Redirect to="/" /> */}
       </Switch>
       :
       <Switch>
         <Route path="/" exact component={this.HomeComponent} />
         <Route path="/login" render={(props) => <Login loginChange={this.LoginChangeHandler} />} />
-        <Redirect from="/" to="/login" />
+        <Route render={() => <this.HandleLoginComponent />} />
+        {/* <Redirect from="/" to="/login" /> */}
       </Switch>}
     </React.Fragment>
 
@@ -81,7 +92,7 @@ class App extends Component {
     <Switch>
       <Route path="/" exact component={this.HomeComponent} />
       <Route path="/dashboard" render={() => <Home auth={this.state} />} />
-      <Route path="/options" component={Options} />
+      <Route path="/final" component={Final} />
       <Route path="/propose" component={Propose} />
       <Route path="/select" component={Select} />
       <Route path="/view" component={View} />
