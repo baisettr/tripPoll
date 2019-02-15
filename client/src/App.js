@@ -1,5 +1,5 @@
-import React, { Component, Suspense } from 'react';
-import { Route, Switch, Redirect, Link } from 'react-router-dom';
+import React, { Component } from 'react';
+import { Route, Switch, Redirect, Link, withRouter } from 'react-router-dom';
 import './App.css';
 import Home from './containers/Home';
 import Final from './containers/Final';
@@ -81,26 +81,12 @@ class App extends Component {
       </Switch>
       :
       <Switch>
-        <Route path="/" exact component={this.HomeComponent} />
+        <Route exact path="/" component={this.HomeComponent} />
         <Route path="/login" render={(props) => <Login loginChange={this.LoginChangeHandler} />} />
-        <Route render={() => <this.HandleLoginComponent />} />
-        {/* <Redirect from="/" to="/login" /> */}
+        <Redirect from="/logout" to="/login" />
+        <Route render={() => <Login loginChange={this.LoginChangeHandler} />} />
       </Switch>}
     </React.Fragment>
-
-  FullComponent = () =>
-    <Switch>
-      <Route path="/" exact component={this.HomeComponent} />
-      <Route path="/dashboard" render={() => <Home auth={this.state} />} />
-      <Route path="/final" component={Final} />
-      <Route path="/propose" component={Propose} />
-      <Route path="/select" component={Select} />
-      <Route path="/view" component={View} />
-      <Route path="/login" component={Login} />
-      {/* <Route path="/login" render={() => (<Suspense fallback={<div>Loading...</div>}><Login /></Suspense>)} />
-   <Route render={() => <h1>404 Authorizing an invalid url!</h1>} />  */}
-      <Redirect from="/" to="/login" />
-    </Switch >
 
   render() {
     return (
@@ -112,4 +98,18 @@ class App extends Component {
   }
 }
 
-export default App;
+/*  FullComponent = () =>
+   <Switch>
+     <Route path="/" exact component={this.HomeComponent} />
+     <Route path="/dashboard" render={() => <Home auth={this.state} />} />
+     <Route path="/final" component={Final} />
+     <Route path="/propose" component={Propose} />
+     <Route path="/select" component={Select} />
+     <Route path="/view" component={View} />
+     <Route path="/login" component={Login} />
+     <Route path="/login" render={() => (<Suspense fallback={<div>Loading...</div>}><Login /></Suspense>)} />
+     <Route render={() => <h1>404 Authorizing an invalid url!</h1>} />
+     <Redirect from="/" to="/login" />
+   </Switch > */
+
+export default withRouter(App);
