@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import { withRouter, Link } from 'react-router-dom';
 
 class Login extends Component {
     constructor(props) {
@@ -92,6 +93,29 @@ class Login extends Component {
             <h6>Please <a href="/#" onClick={this.SignUpShowHandler.bind(this)}>SignUp</a> if you don't have an account!</h6>
         </div>
 
+    LoginCardComponent = () =>
+        <div className="cardLogin">
+            <div className="card-title h4">Sign in Trip Poll!</div>
+            <div className="card-body">
+                <h6 style={{ color: 'red' }}>{this.state.error}</h6>
+                <div >
+                    <form onSubmit={this.userSignIn} >
+                        <div className="form-group" style={{ textAlign: "left" }}>
+                            <label htmlFor="exampleInputEmail1">Email address</label>
+                            <input type="email" className="form-control" defaultValue={this.state.userEmail} onChange={(e) => { this.setState({ userEmail: e.target.value, error: "" }) }} placeholder="enter email" required={true} id="exampleInputEmail1" aria-describedby="emailHelp" />
+                        </div>
+                        <div className="form-group" style={{ textAlign: "left" }}>
+                            <label htmlFor="exampleInputPassword1">Password</label>
+                            <input type="password" className="form-control" defaultValue={this.state.userPassword} onChange={(e) => { this.setState({ userPassword: e.target.value, error: "" }) }} placeholder="enter password" required={true} id="exampleInputPassword1" />
+                        </div>
+                        <button className="btn btn-dark">Sign in</button>
+                    </form>
+                </div>
+                <br />
+                <h6>Please <a href="/#" onClick={this.SignUpShowHandler.bind(this)}>Sign up</a> if you don't have an account</h6>
+            </div>
+        </div>
+
 
     SignUpComponent = () =>
         <div>
@@ -116,14 +140,42 @@ class Login extends Component {
             <h6>Please <a href="/#" onClick={this.SignInShowHandler.bind(this)}>SignIn</a> if you already have an account!</h6>
         </div>
 
+
+    SignUpCardComponent = () =>
+        <div className="cardLogin">
+            <div className="card-title h4">Sign up Trip Poll!</div>
+            <div className="card-body">
+                <h6 style={{ color: 'red' }}>{this.state.error}</h6>
+                <div >
+                    <form onSubmit={this.userSignUp} >
+                        <div className="form-group" style={{ textAlign: "left" }}>
+                            <label htmlFor="inputName">Full Name</label>
+                            <input type="email" className="form-control" defaultValue={this.state.userName} onChange={(e) => { this.setState({ userName: e.target.value, error: "" }) }} placeholder="enter full name" required={true} id="inputName" aria-describedby="nameHelp" />
+                        </div>
+                        <div className="form-group" style={{ textAlign: "left" }}>
+                            <label htmlFor="inputEmail">Email address</label>
+                            <input type="email" className="form-control" defaultValue={this.state.userEmail} onChange={(e) => { this.setState({ userEmail: e.target.value, error: "" }) }} placeholder="enter email" required={true} id="inputEmail" aria-describedby="emailHelp" />
+                        </div>
+                        <div className="form-group" style={{ textAlign: "left" }}>
+                            <label htmlFor="inputPassword">Password</label>
+                            <input type="password" className="form-control" defaultValue={this.state.userPassword} onChange={(e) => { this.setState({ userPassword: e.target.value, error: "" }) }} placeholder="enter password" required={true} id="inputPassword" />
+                        </div>
+                        <button className="btn btn-dark">Sign up</button>
+                    </form>
+                </div>
+                <br />
+                <h6>Please <a href="/#" onClick={this.SignInShowHandler.bind(this)}>Sign in</a> if you already have an account!</h6>
+            </div>
+        </div>
+
     SpinComponent = () => <div className='Loader'>Loading...</div>
 
     switchComponent = (e) => {
         switch (e) {
-            case 0: return <this.LoginComponent />
-            case 1: return <this.SignUpComponent />
+            case 0: return <this.LoginCardComponent />
+            case 1: return <this.SignUpCardComponent />
             case 2: return <this.SpinComponent />
-            default: return <h4>Please <a href="/login" >Login</a></h4>
+            default: return <h4>Please <Link to="/login" >Login</Link></h4>
         }
     }
 
@@ -135,14 +187,14 @@ class Login extends Component {
         return (
             <div className="jumbotron container divHome">
 
-                <div>
+                <div className="divFlexLogin">
                     {this.switchComponent(this.state.actionStep)}
                 </div>
                 <br /><br />
-                <h6>Proceed to <a href="/">Home</a></h6>
+                <h6>Proceed to <Link to="/">Home</Link></h6>
             </div>
         );
     }
 }
 
-export default Login;
+export default withRouter(Login);
