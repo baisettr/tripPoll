@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import DayPicker from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
+import { withRouter, Link } from 'react-router-dom';
 
 const styles = {
     divHome: {
@@ -119,7 +120,7 @@ class View extends Component {
                 {this.state.selectedAirbnbPlaces.map((lis, index) => (
                     <div id="airbnbGrid" className="card grid-item" key={index} >
                         <img className="card-img-top" src={lis.thumb} alt="" />
-                        <h6 className="">{lis.name} </h6>
+                        <h6 >{lis.name} </h6>
                         <h6>${lis.price} per night{' '}
                             <a style={{ fontSize: '13px' }} className="btn-link" href='/#' onClick={this.airbnbRoomSearchHandler.bind(this, lis.id)}>More...</a>
                         </h6>
@@ -134,34 +135,36 @@ class View extends Component {
             <br />
             <h6>Trip Share and Car Details</h6>
             <br />
-            <label style={{ paddingRight: '10px' }}>Estimated share for the Trip (in $) - {this.state.finalTrip.userOtherOptions.userShare}</label>
+            <label style={{ paddingRight: '10px' }}>Total share for the Trip (in $) - {this.state.finalTrip.userOtherOptions.userShare}</label>
             <br />
-            <label style={{ paddingRight: '10px' }}>Going trip via Car - {this.state.finalTrip.userOtherOptions.userHasCar ? 'Yes' : 'No'}</label>
+            <label style={{ paddingRight: '10px' }}>Going trip via Car - {this.state.finalTrip.userOtherOptions.userHasCar}</label>
             <br />
             <label style={{ paddingRight: '10px' }}>Total number of people can drive through Car - {this.state.finalTrip.userOtherOptions.userCarFit}</label>
         </div>
 
     TripHomeComponent = () =>
         <div>
-            <h4>Finalized Trip Details</h4>
+            <h6>Finalized Trip Details</h6>
             <br />
             <div>
                 <h6>Destination : {this.state.destination}</h6>
             </div>
-            <div>
-                <br />
-                <h6>Trip Dates</h6>
-                <DayPicker selectedDays={this.state.finalTrip.selectedDays.map((day) => new Date(day))} disabledDays={{ before: new Date() }} />
-            </div>
         </div>
-
-    DisplayLinks = () => <div>
-        <div>
-            <label>Link to Select or Update Options</label>
-            <input className="inputPlace" defaultValue={'http://localhost:3000/select?tripId=' + this.state.tripId} readOnly />
-            <button className="btn btn-link" onClick={() => this.props.history.push(this.state.tripSelectionUrl)}> Click to Preview</button>
-        </div>
+    DateComponent = () => <div >
+        <h6>Trip Dates</h6>
+        <DayPicker selectedDays={this.state.finalTrip.selectedDays.map((day) => new Date(day))} disabledDays={{ before: new Date() }} />
     </div>
+
+    DisplayLinks = () => {
+        const url = '/select?tripId=' + this.state.tripId;
+        return (<div>
+            <div>
+                <label>Link to Select or Update Options</label>
+                <input className="inputPlace" defaultValue={'http://localhost:3000' + url} readOnly />
+                <button className="btn btn-link" onClick={() => this.props.history.push(url)}> Click to Preview</button>
+            </div>
+        </div>)
+    }
 
     DisplayLinksComponent = () =>
         <div>
@@ -172,10 +175,13 @@ class View extends Component {
 
     DisplayTripDetails = () =>
         <div>
-            <this.TripHomeComponent />
+            <div className="grid-container-view">
+                <this.TripHomeComponent />
+                <this.DateComponent />
+                <this.ShareAndCarComponent />
+            </div>
             <this.GooglePlacesComponent />
             <this.AirbnbPlacesComponent />
-            <this.ShareAndCarComponent />
         </div>
 
     SpinComponent = () => <div className='Loader'>Loading...</div>
@@ -186,7 +192,7 @@ class View extends Component {
             case 1: return <this.DisplayTripDetails />
             case 2: return <this.DisplayLinksComponent />
             case 3: return <this.SpinComponent />
-            default: return <h4>Please <a href="/login" >Login</a></h4>
+            default: return <h4>Please <Link to="/login" >Login</Link></h4>
         }
     }
 
@@ -197,10 +203,10 @@ class View extends Component {
                     {this.switchComponent(this.state.activeStep)}
                 </div>
                 <br /><br />
-                <h6>Proceed to <a href="/">Home</a></h6>
+                <h6>Proceed to <Link to="/">Home</Link></h6>
             </div>
         );
     }
 }
 
-export default View;
+export default withRouter(View);
