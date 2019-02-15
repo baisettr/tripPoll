@@ -4,7 +4,7 @@ import DayPicker, { DateUtils } from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
 import AirbnbTest from '../components/AirbnbComponent';
 import GoogleTest from '../components/GoogleComponent';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 
 const styles = {
     divHome: {
@@ -18,7 +18,7 @@ class Final extends Component {
     constructor(props) {
         super(props);
         const tripId = props.location.search.split('=')[1];
-        this.state = { error: '', userId: "8906", tripId: "", tripOId: '', activeStep: 0, destination: "", userSelection: {}, tripSelectedOptions: {}, selectedDays: [], listAirbnbPlaces: [], listGooglePlaces: [], selectedGooglePlaces: {}, selectedAirbnbPlaces: {}, userOtherOptions: { userShare: 0, userHasCar: false, userCarFit: 0 } };
+        this.state = { error: '', users: [], finalTrip: {}, userId: "8906", tripId: tripId, tripOId: '', activeStep: 0, destination: "", userSelection: {}, tripSelectedOptions: {}, selectedDays: [], listAirbnbPlaces: [], listGooglePlaces: [], selectedGooglePlaces: {}, selectedAirbnbPlaces: {}, userOtherOptions: { userShare: 0, userHasCar: 0, userCarFit: 0 } };
     }
 
     componentDidMount() {
@@ -34,17 +34,52 @@ class Final extends Component {
         }
     }
 
-    getTripDetails = (tripId) => {
+    finalize = async (tripSel, tripListGooglePlaces, tripListAirbnbPlaces) => {
+        let finalTrip = { selectedGooglePlaces: {}, selectedAirbnbPlaces: {}, selectedDays: {}, userShare: 0, userHasCar: 0, userCarFit: 0 }
+        const f_sort = (sel) => { let y = Object.keys(sel); return y.sort((a, b) => sel[b] - sel[a]) };
+        const f_map = (selPlace, sel) => { let selList = sel.length ? sel : Object.keys(sel); selList.map((s) => { if (!selPlace[s]) { selPlace[s] = 0; }; selPlace[s] += 1; }) };
+        let users = Object.keys(tripSel);
+
+        users.map((s) => {
+            f_map(finalTrip.selectedGooglePlaces, tripSel[s].selectedGooglePlaces);
+            f_map(finalTrip.selectedAirbnbPlaces, tripSel[s].selectedAirbnbPlaces);
+            f_map(finalTrip.selectedDays, tripSel[s].selectedDays);
+            finalTrip.userShare += Number(tripSel[s].userOtherOptions.userShare);
+            if (tripSel[s].userOtherOptions.userHasCar) { finalTrip.userHasCar += 1 };
+            finalTrip.userCarFit += Number(tripSel[s].userOtherOptions.userCarFit);
+        });
+        let topSelectedGooglePlaces = f_sort(finalTrip.selectedGooglePlaces);
+        let topSelectedAirbnbPlaces = f_sort(finalTrip.selectedAirbnbPlaces);
+        let topSelectedDays = f_sort(finalTrip.selectedDays);
+        let userOtherOptions = { userShare: finalTrip.userShare, userHasCar: finalTrip.userHasCar, userCarFit: finalTrip.userCarFit }
+        console.log(finalTrip);
+        let selectedGooglePlaces = {};
+        let listGooglePlaces = [];
+        for (const i in topSelectedGooglePlaces) {
+            const place = tripListGooglePlaces[i];
+            selectedGooglePlaces[place.id] = 1;
+            listGooglePlaces.push(place);
+        };
+        let listAirbnbPlaces = [];
+        let selectedAirbnbPlaces = {};
+        for (const i in topSelectedAirbnbPlaces) {
+            const room = tripListAirbnbPlaces[i];
+            selectedAirbnbPlaces[room.id] = 1;
+            listAirbnbPlaces.push(room);
+        };
+        this.setState({ finalTrip, users, selectedDays: topSelectedDays, selectedGooglePlaces, selectedAirbnbPlaces, listGooglePlaces, listAirbnbPlaces, userOtherOptions });
+    }
+
+    getTripDetails = async (tripId) => {
         const userToken = localStorage.userToken;
         const headers = { Authorization: 'Bearer ' + userToken };
         const url = '/trip?tripId=' + tripId;
         axios.get(url, { headers }
         ).then((res) => {
             const trip = res.data;
-            const { _id, tripDestination, tripSelectedDays, tripListGooglePlaces, tripListAirbnbPlaces, tripSelectedOptions } = trip;
-            const userId = this.state.userId;
-            const userSelection = tripSelectedOptions[userId] ? tripSelectedOptions[userId] : {};
-            this.setState({ activeStep: 1, tripOId: _id.$oid, destination: tripDestination, selectedDays: tripSelectedDays, listGooglePlaces: tripListGooglePlaces, listAirbnbPlaces: tripListAirbnbPlaces, tripSelectedOptions, userSelection });
+            const { _id, tripDestination, tripListGooglePlaces, tripListAirbnbPlaces, tripSelectedOptions } = trip;
+            this.finalize(tripSelectedOptions, tripListGooglePlaces, tripListAirbnbPlaces);
+            this.setState({ activeStep: 1, tripOId: _id.$oid, destination: tripDestination, tripSelectedOptions });
         }).catch((error) => {
             const message = error.response.data.message;
             this.setState({ error: message, activeStep: 0 })
@@ -71,7 +106,7 @@ class Final extends Component {
         </div>
 
     handleDayClick(day, { selected }) {
-        const { selectedDays } = this.state;
+        const { selectedDays } = this.state.selectedDays;
         if (selected) {
             const selectedIndex = selectedDays.findIndex(selectedDay =>
                 DateUtils.isSameDay(new Date(selectedDay), day)
@@ -85,7 +120,7 @@ class Final extends Component {
 
     DateComponent = () =>
         <div>
-            <h4>Choose the Trip Dates</h4>
+            <h6>Trip Dates selected!</h6>
             <br />
             <DayPicker selectedDays={this.state.selectedDays.map((day) => new Date(day))}
                 disabledDays={{ before: new Date() }} onDayClick={this.handleDayClick.bind(this)}
@@ -94,9 +129,9 @@ class Final extends Component {
 
     ShareAndCarComponent = () =>
         <div>
-            <h4>Trip Share and Car Details</h4>
+            <h6>Trip Share and Car Details</h6>
             <br />
-            <label style={{ paddingRight: '10px' }}>Enter your share for the Trip (in $)</label>
+            <label style={{ paddingRight: '10px' }}>Total share for the Trip (in $)</label>
             <input className="inputShare inputPlace" placeholder="Enter a Share Amount in $" required={true} type="number" defaultValue={this.state.userOtherOptions.userShare}
                 onChange={(e) => {
                     const { userOtherOptions } = this.state;
@@ -105,19 +140,18 @@ class Final extends Component {
                 }} />
             <br />
             <div >
-                <label style={{ paddingRight: '15px' }}>Do you own a Car for the Trip?</label>
-                <label>
-                    <input type="radio" value="yes" onClick={(e) => {
+                <label style={{ paddingRight: '15px' }}>People with Cars</label>
+                <input className="inputShare inputPlace" placeholder="User car" required={true} type="number" defaultValue={this.state.userOtherOptions.userHasCar}
+                    onChange={(e) => {
                         const { userOtherOptions } = this.state;
-                        userOtherOptions.userHasCar = true;
+                        userOtherOptions.userHasCar = e.target.value;
                         this.setState({ userOtherOptions });
-                    }} /><span style={{ paddingLeft: '5px' }}>Yes</span>
-                </label>
+                    }} />
             </div>
             <br />
             {this.state.userOtherOptions.userHasCar ?
                 <div>
-                    <label style={{ paddingRight: '10px' }}>How many people you can accomodate?</label>
+                    <label style={{ paddingRight: '10px' }}>People can accomodate</label>
                     <input className="inputCarSeating inputPlace" placeholder="How many people you can accomodate?" required={true} type="number" defaultValue={this.state.userOtherOptions.userCarFit}
                         onChange={(e) => {
                             const { userOtherOptions } = this.state;
@@ -172,25 +206,26 @@ class Final extends Component {
 
     TripHomeComponent = () =>
         <div>
-            <h4>Trip Details</h4>
+            <h6>Trip Details</h6>
             <br />
             <div>
                 <label>Destination : {this.state.destination}</label>
             </div>
+            <div>
+                <label>Trip Owner : {this.state.userId} </label>
+                <br />
+                <label>Other Listed Trip Friends </label>
+                {this.state.users.map((u, index) => <h6 key={index}>{u}</h6>)}
+            </div>
         </div>
 
     generateTripOptions = () => {
-        const userId = this.state.userId;
-        const { tripSelectedOptions } = this.state;
-        const newUserSelection = { selectedGooglePlaces: this.state.selectedGooglePlaces, selectedAirbnbPlaces: this.state.selectedAirbnbPlaces, selectedDays: this.state.selectedDays, userOtherOptions: this.state.userOtherOptions };
-
-        tripSelectedOptions[userId] = newUserSelection;
-
-        this.saveTripOptions(tripSelectedOptions);
+        const finalSelection = { selectedGooglePlaces: this.state.selectedGooglePlaces, selectedAirbnbPlaces: this.state.selectedAirbnbPlaces, selectedDays: this.state.selectedDays, userOtherOptions: this.state.userOtherOptions };
+        this.saveTripOptions(finalSelection);
     }
 
     saveTripOptions = (tripOptions) => {
-        const url = '/tripOptions';
+        const url = '/tripFinal';
         const userToken = localStorage.userToken;
         const headers = { Authorization: 'Bearer ' + userToken };
         axios.post(url, { tripId: this.state.tripOId, data: tripOptions }, { headers }
@@ -212,11 +247,16 @@ class Final extends Component {
 
     DisplayTripDetails = () =>
         <div>
-            <this.TripHomeComponent />
-            <this.DateComponent />
-            <GoogleTest destination={this.state.destination} listGooglePlaces={this.state.listGooglePlaces} selectedGooglePlaces={this.state.selectedGooglePlaces} handleGoogleClick={this.handleGoogleClick} />
-            <AirbnbTest destination={this.state.destination} listAirbnbPlaces={this.state.listAirbnbPlaces} selectedAirbnbPlaces={this.state.selectedAirbnbPlaces} handleAirbnbClick={this.handleAirbnbClick} />
-            <this.ShareAndCarComponent />
+            <div className="grid-container-view">
+                <this.TripHomeComponent />
+                <this.DateComponent />
+                <this.ShareAndCarComponent />
+            </div>
+            <br /><br />
+            <GoogleTest status={true} destination={this.state.destination} listGooglePlaces={this.state.listGooglePlaces} selectedGooglePlaces={this.state.selectedGooglePlaces} handleGoogleClick={this.handleGoogleClick} />
+            <br /><br /><br />
+            <AirbnbTest status={true} destination={this.state.destination} listAirbnbPlaces={this.state.listAirbnbPlaces} selectedAirbnbPlaces={this.state.selectedAirbnbPlaces} handleAirbnbClick={this.handleAirbnbClick} />
+            <br /><br />
             <this.FinalizeComponent />
         </div>
 
@@ -234,7 +274,7 @@ class Final extends Component {
             case 1: return <this.DisplayTripDetails />
             case 2: return <this.TripSuccessComponent />
             case 3: return <this.SpinComponent />
-            default: return <h4>Please <a href="/login" >Login</a></h4>
+            default: return <h4>Please <Link to="/login" >Login</Link></h4>
         }
     }
 
@@ -245,10 +285,10 @@ class Final extends Component {
                     {this.switchComponent(this.state.activeStep)}
                 </div>
                 <br /><br />
-                <h6>Proceed to <a href="/">Home</a></h6>
+                <h6>Proceed to <Link to="/">Home</Link></h6>
             </div>
         );
     }
 }
 
-export default Final;
+export default withRouter(Final);
