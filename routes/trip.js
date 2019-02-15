@@ -61,7 +61,7 @@ module.exports = app => {
     app.post('/tripFinal', checkUserAuth, (req, res) => {
         const tripId = req.body.tripId;
         const tripFinalOptions = req.body.data;
-        trip.saveTripOptions(tripId, tripFinalOptions)
+        trip.saveFinalTrip(tripId, tripFinalOptions)
             .then((data) => {
                 res.send(data);
             })
