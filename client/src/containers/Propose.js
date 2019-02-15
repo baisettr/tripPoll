@@ -4,6 +4,7 @@ import DayPicker, { DateUtils } from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
 import AirbnbTest from '../components/AirbnbComponent';
 import GoogleTest from '../components/GoogleComponent';
+import { withRouter, Link } from 'react-router-dom';
 
 const styles = {
     divHome: {
@@ -88,6 +89,16 @@ class Propose extends Component {
         const tripId = Math.round(10000 + Math.random() * 10000, 5);
         const userSelection = {};
         const userId = this.state.userId;
+        /* const selectedGooglePlaces = this.state.selectedGooglePlaces;
+        const selectedAirbnbPlaces = this.state.selectedAirbnbPlaces;
+        let userSelectedGooglePlaces = [];
+        let userSelectedAirbnbPlaces = [];
+        for (place in selectedGooglePlaces) {
+            userSelectedGooglePlaces = [...selectedGooglePlaces[place]]
+        }
+        for (place in selectedAirbnbPlaces) {
+            userSelectedAirbnbPlaces = [...selectedAirbnbPlaces[place]]
+        } */
         userSelection[userId] = { selectedGooglePlaces: this.state.selectedGooglePlaces, selectedAirbnbPlaces: this.state.selectedAirbnbPlaces, selectedDays: this.state.selectedDays, userOtherOptions: this.state.userOtherOptions };
 
         const trip = { tripId: tripId, tripDestination: this.state.destination, tripListGooglePlaces: this.state.listGooglePlaces, tripOwnerId: this.state.userId, tripSelectedDays: this.state.selectedDays, tripListAirbnbPlaces: this.state.listAirbnbPlaces, tripSelectedOptions: userSelection };
@@ -238,7 +249,7 @@ class Propose extends Component {
             case 2: return <GoogleTest destination={this.state.destination} listGooglePlaces={this.state.listGooglePlaces} selectedGooglePlaces={this.state.selectedGooglePlaces} handleGoogleClick={this.handleGoogleClick} />
             case 3: return <AirbnbTest destination={this.state.destination} listAirbnbPlaces={this.state.listAirbnbPlaces} selectedAirbnbPlaces={this.state.selectedAirbnbPlaces} handleAirbnbClick={this.handleAirbnbClick} />
             case 4: return <this.ShareAndCarComponent />
-            default: return <h4>Please <a href="/login" >Login</a></h4>
+            default: return <h4>Please <Link to="/login" >Login</Link></h4>
         }
     }
 
@@ -273,10 +284,10 @@ class Propose extends Component {
                     <this.TripSuccessComponent />
                 }
                 <br /><br />
-                <h6>Proceed to <a href="/">Home</a></h6>
+                <h6>Proceed to <Link to="/">Home</Link></h6>
             </div>
         );
     }
 }
 
-export default Propose;
+export default withRouter(Propose);

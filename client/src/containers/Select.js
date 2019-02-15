@@ -4,6 +4,7 @@ import DayPicker, { DateUtils } from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
 import AirbnbTest from '../components/AirbnbComponent';
 import GoogleTest from '../components/GoogleComponent';
+import { Link, withRouter } from 'react-router-dom';
 
 const styles = {
     divHome: {
@@ -218,7 +219,7 @@ class Select extends Component {
             case 5: return <this.ShareAndCarComponent />
             case 6: return <this.TripSuccessComponent />
             case 7: return <this.SpinComponent />
-            default: return <h4>Please <a href="/login" >Login</a></h4>
+            default: return <h4>Please <Link to="/login" >Login</Link></h4>
         }
     }
 
@@ -252,10 +253,10 @@ class Select extends Component {
                     <div></div>
                 }
                 <br /><br />
-                <h6>Proceed to <a href="/">Home</a></h6>
+                <h6>Proceed to <Link to="/">Home</Link></h6>
             </div>
         );
     }
 }
 
-export default Select;
+export default withRouter(Select);

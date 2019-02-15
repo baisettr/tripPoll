@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 
 const styles = {
     divHome: {
@@ -157,7 +157,7 @@ class Home extends Component {
             case 1: return <this.MyTripsComponent />
             case 2: return <this.FriendsTripsComponent />
             case 3: return <this.SpinComponent />
-            default: return <h4>Please <a href="/login">Login</a> Have a Nice Day!</h4>
+            default: return <h4>Please <Link to="/login">Login</Link> Have a Nice Day!</h4>
         }
     }
 
@@ -175,4 +175,4 @@ class Home extends Component {
     }
 }
 
-export default Home;
+export default withRouter(Home);

@@ -12,7 +12,7 @@ const AirbnbPlacesComponent = (props) => {
 
     return (
         <div>
-            <h4>Choose the list of Airbnb accomodations! {destination}</h4>
+            {props.status ? <h6>Top list of Airbnb accomodations selected! {destination}</h6> : <h4>Choose the list of Airbnb accomodations! {destination}</h4>}
             <br />
             <div className="grid-container">
                 {listAirbnbPlaces.map((lis, index) => (

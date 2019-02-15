@@ -12,7 +12,7 @@ const GooglePlacesComponent = (props) => {
 
     return (
         <div>
-            <h4>Choose the list of interesting tourist attractions! {destination}</h4>
+            {props.status ? <h6>Top list of interesting tourist attractions selected! {destination}</h6> : <h4>Choose the list of interesting tourist attractions! {destination}</h4>}
             <br />
             <div className="grid-container">
                 {listGooglePlaces.map((place, index) => (
