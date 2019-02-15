@@ -4,9 +4,9 @@ body {
     sans-serif;
   -background-color: rgba(0, 0, 0, 0.08)
 }
-.navbar a {color: #9d9d9d !important;}
+/* .navbar a:hover {color: #9d9d9d !important;} */
 
-.navbar a:hover{color:#fff !important;}
+/* .navbar a{color:#fff !important;} */
 
 .bg-dark {
   background: rgba(45,45,45,0.98) !important;
