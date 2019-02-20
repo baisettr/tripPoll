@@ -18,7 +18,9 @@ class Final extends Component {
     constructor(props) {
         super(props);
         const tripId = props.location.search.split('=')[1];
-        this.state = { error: '', users: [], finalTrip: {}, userId: "8906", tripId: tripId, tripOId: '', activeStep: 0, destination: "", userSelection: {}, tripSelectedOptions: {}, selectedDays: [], listAirbnbPlaces: [], listGooglePlaces: [], selectedGooglePlaces: {}, selectedAirbnbPlaces: {}, userOtherOptions: { userShare: 0, userHasCar: 0, userCarFit: 0 } };
+        const userId = localStorage.getItem('userId');
+        const userName = localStorage.getItem('userName');
+        this.state = { error: '', finalTrip: {}, user: { userId, userName }, tripId: tripId, tripOId: '', activeStep: 0, destination: "", userSelection: {}, tripSelectedOptions: {}, selectedDays: [], finalSelectedDays: [], listAirbnbPlaces: [], listGooglePlaces: [], selectedGooglePlaces: {}, selectedAirbnbPlaces: {}, userOtherOptions: { userShare: 0, userHasCar: 0, userCarFit: 0 } };
     }
 
     componentDidMount() {
@@ -35,15 +37,15 @@ class Final extends Component {
     }
 
     finalize = async (tripSel, tripListGooglePlaces, tripListAirbnbPlaces) => {
-        let finalTrip = { selectedGooglePlaces: {}, selectedAirbnbPlaces: {}, selectedDays: {}, userShare: 0, userHasCar: 0, userCarFit: 0 }
+        let finalTrip = { users: [], selectedGooglePlaces: {}, selectedAirbnbPlaces: {}, selectedDays: {}, userShare: 0, userHasCar: 0, userCarFit: 0 }
         const f_sort = (sel) => { let y = Object.keys(sel); return y.sort((a, b) => sel[b] - sel[a]) };
         const f_map = (selPlace, sel) => { let selList = sel.length ? sel : Object.keys(sel); selList.map((s) => { if (!selPlace[s]) { selPlace[s] = 0; }; selPlace[s] += 1; }) };
-        let users = Object.keys(tripSel);
-
-        users.map((s) => {
+        let userIds = Object.keys(tripSel);
+        userIds.map((s) => {
             f_map(finalTrip.selectedGooglePlaces, tripSel[s].selectedGooglePlaces);
             f_map(finalTrip.selectedAirbnbPlaces, tripSel[s].selectedAirbnbPlaces);
             f_map(finalTrip.selectedDays, tripSel[s].selectedDays);
+            finalTrip.users.push(tripSel[s].userName);
             finalTrip.userShare += Number(tripSel[s].userOtherOptions.userShare);
             if (tripSel[s].userOtherOptions.userHasCar) { finalTrip.userHasCar += 1 };
             finalTrip.userCarFit += Number(tripSel[s].userOtherOptions.userCarFit);
@@ -67,7 +69,7 @@ class Final extends Component {
             selectedAirbnbPlaces[room.id] = 1;
             listAirbnbPlaces.push(room);
         };
-        this.setState({ finalTrip, users, selectedDays: topSelectedDays, selectedGooglePlaces, selectedAirbnbPlaces, listGooglePlaces, listAirbnbPlaces, userOtherOptions });
+        this.setState({ finalTrip, finalSelectedDays: topSelectedDays, selectedGooglePlaces, selectedAirbnbPlaces, listGooglePlaces, listAirbnbPlaces, userOtherOptions });
     }
 
     getTripDetails = async (tripId) => {
@@ -106,7 +108,7 @@ class Final extends Component {
         </div>
 
     handleDayClick(day, { selected }) {
-        const { selectedDays } = this.state.selectedDays;
+        const selectedDays = this.state.selectedDays;
         if (selected) {
             const selectedIndex = selectedDays.findIndex(selectedDay =>
                 DateUtils.isSameDay(new Date(selectedDay), day)
@@ -114,19 +116,34 @@ class Final extends Component {
             selectedDays.splice(selectedIndex, 1);
         } else {
             selectedDays.push(day);
-        }
+            //finalSelectedDays = finalSelectedDays.filter((e) => new Date(e).getDate() !== day.getDate());
+        };
         this.setState({ selectedDays });
+    };
+
+
+
+    DateComponent = () => {
+        const modifiers = {
+            days: this.state.finalSelectedDays.map((day) => new Date(day).getDate() >= new Date().getDate() ? new Date(day) : '')
+        };
+        const modifiersStyles = {
+            days: {
+                borderStyle: 'solid',
+                borderColor: 'burlywood',
+                borderRadius: '50%'
+            }
+        };
+        return (
+            <div>
+                <h6>Trip Dates selected!</h6>
+                <DayPicker modifiers={modifiers} month={new Date(this.state.finalSelectedDays[0])}
+                    modifiersStyles={modifiersStyles} selectedDays={this.state.selectedDays.map((day) => new Date(day))}
+                    disabledDays={{ before: new Date() }} onDayClick={this.handleDayClick.bind(this)}
+                />
+            </div>
+        )
     }
-
-    DateComponent = () =>
-        <div>
-            <h6>Trip Dates selected!</h6>
-            <br />
-            <DayPicker selectedDays={this.state.selectedDays.map((day) => new Date(day))}
-                disabledDays={{ before: new Date() }} onDayClick={this.handleDayClick.bind(this)}
-            />
-        </div>
-
     ShareAndCarComponent = () =>
         <div>
             <h6>Trip Share and Car Details</h6>
@@ -212,15 +229,15 @@ class Final extends Component {
                 <label>Destination : {this.state.destination}</label>
             </div>
             <div>
-                <label>Trip Owner : {this.state.userId} </label>
+                <label>Trip Owner : {this.state.user.userName} </label>
                 <br />
                 <label>Other Listed Trip Friends </label>
-                {this.state.users.map((u, index) => <h6 key={index}>{u}</h6>)}
+                {this.state.finalTrip.users.map((u, index) => <h6 key={index}>{u}</h6>)}
             </div>
         </div>
 
     generateTripOptions = () => {
-        const finalSelection = { selectedGooglePlaces: this.state.selectedGooglePlaces, selectedAirbnbPlaces: this.state.selectedAirbnbPlaces, selectedDays: this.state.selectedDays, userOtherOptions: this.state.userOtherOptions };
+        const finalSelection = { users: this.state.finalTrip.users, selectedGooglePlaces: this.state.selectedGooglePlaces, selectedAirbnbPlaces: this.state.selectedAirbnbPlaces, selectedDays: this.state.selectedDays, userOtherOptions: this.state.userOtherOptions };
         this.saveTripOptions(finalSelection);
     }
 
