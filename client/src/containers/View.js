@@ -3,6 +3,10 @@ import axios from 'axios';
 import DayPicker from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
 import { withRouter, Link } from 'react-router-dom';
+import {
+    FacebookShareButton, TwitterShareButton, WhatsappShareButton, EmailShareButton,
+    EmailIcon, WhatsappIcon, TwitterIcon, FacebookIcon
+} from 'react-share';
 
 const styles = {
     divHome: {
@@ -16,7 +20,7 @@ class View extends Component {
     constructor(props) {
         super(props);
         const tripId = props.location.search.split('=')[1];
-        this.state = { error: "", user: {}, tripId: tripId, finalTrip: {}, activeStep: 0, destination: "", selectedAirbnbPlaces: [], selectedGooglePlaces: [], listAirbnbPlaces: [], listGooglePlaces: [] };
+        this.state = { error: "", user: {}, tripId: tripId, finalTrip: {}, activeStep: 0, destination: "", tripSelectionUrl: "https://rkbeavs.me/trpo/select?tripId=", selectedAirbnbPlaces: [], selectedGooglePlaces: [], listAirbnbPlaces: [], listGooglePlaces: [] };
     }
 
     componentDidMount() {
@@ -27,7 +31,8 @@ class View extends Component {
         }
         const tripId = queryParams["tripId"];
         if (tripId) {
-            this.setState({ tripId, activeStep: 3 });
+            const tripSelectionUrl = this.state.tripSelectionUrl + tripId;
+            this.setState({ tripId, tripSelectionUrl, activeStep: 3 });
             this.getTripDetails(tripId);
         }
     }
@@ -69,6 +74,8 @@ class View extends Component {
         e.preventDefault();
         this.setState({ activeStep: 3 });
         const tripId = this.state.tripId;
+        const tripSelectionUrl = this.state.tripSelectionUrl + tripId;
+        this.setState({ tripSelectionUrl });
         this.getTripDetails(tripId);
     }
 
@@ -161,21 +168,51 @@ class View extends Component {
         <DayPicker month={new Date(this.state.finalTrip.selectedDays[0])} selectedDays={this.state.finalTrip.selectedDays.map((day) => new Date(day))} />
     </div>
 
-    DisplayLinks = () => {
-        const url = '/select?tripId=' + this.state.tripId;
-        return (<div>
-            <div>
-                <label>Link to Select or Update Options</label>
-                <input className="inputPlace" defaultValue={'http://localhost:3000' + url} readOnly />
-                <button className="btn btn-link" onClick={() => this.props.history.push(url)}> Click to Preview</button>
+    DisplayLinks = () =>
+        <div >
+            <div style={{ display: "inline-flex" }}>
+                <div className="btn">
+                    <FacebookShareButton className="btn" url={this.state.tripSelectionUrl} quote={"Please select trip options for " + this.state.destination} >
+                        <FacebookIcon size={40} round={true} />
+                    </FacebookShareButton>
+                    <h6>Facebook</h6>
+                </div>
+                <div className="btn">
+                    <TwitterShareButton className="btn" hashtags={['trip poll']} title={"Please select trip options for " + this.state.destination} url={this.state.tripSelectionUrl} >
+                        <TwitterIcon size={40} round={true} />
+                    </TwitterShareButton>
+                    <h6>Twitter</h6>
+                </div>
+                <div className="btn">
+                    <EmailShareButton className="btn" url={this.state.tripSelectionUrl} subject={"Please select trip options for " + this.state.destination} body={"Hello\n\nWelcome to Trip Poll!\nPlease follow the link to select options\n" + this.state.tripSelectionUrl + "\n\nThank You\n" + this.state.user.userName}>
+                        <EmailIcon size={40} round={true} />
+                    </EmailShareButton>
+                    <h6>Email</h6>
+                </div>
+                <div className="btn">
+                    <WhatsappShareButton className="btn" url={this.state.tripSelectionUrl} title={"Please select trip options for " + this.state.destination}>
+                        <WhatsappIcon size={40} round={true} />
+                    </WhatsappShareButton>
+                    <h6>WhatsApp</h6>
+                </div>
             </div>
-        </div>)
+            <br /><br /><br />
+            <div style={{ display: "inline-flex" }}>
+                <input id="tripSelectionUrl" className="form-control inputPlace" defaultValue={this.state.tripSelectionUrl} readOnly />
+                <button className="btn btn-dark" onClick={this.CopyLinkSelect}> Copy Link</button>
+            </div>
+        </div>
+
+    CopyLinkSelect = () => {
+        const tripSelectionUrl = document.getElementById('tripSelectionUrl');
+        tripSelectionUrl.select();
+        document.execCommand("copy");
     }
 
     DisplayLinksComponent = () =>
         <div>
             <h4>Trip has not yet finalized!</h4>
-            <br />
+            <br /><br />
             <this.DisplayLinks />
         </div>
 
