@@ -9,6 +9,8 @@ class Logout extends Component {
     userSignOut = async () => {
         localStorage.removeItem('userExpiration');
         localStorage.removeItem('userToken');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userName');
         this.props.logoutChange(false);
     };
     render() {

@@ -17,10 +17,15 @@ class Login extends Component {
         const url = '/userSignIn';
         axios.post(url, { data: userCredentials }
         ).then((res) => {
-            const userToken = res.data.token;
+            //console.log(res.data.userClient);
+            const userToken = res.data.userClient.token;
             const userExpiration = new Date(new Date().getTime() + 59 * 60 * 1000);
+            const userId = res.data.userClient.userId;
+            const userName = res.data.userClient.userName;
             localStorage.setItem('userExpiration', userExpiration);
             localStorage.setItem('userToken', userToken);
+            localStorage.setItem('userId', userId);
+            localStorage.setItem('userName', userName);
             //this.props.history.push('/', this.state)
             this.setState({ isSignedIn: true });
             this.props.loginChange(true);
@@ -33,17 +38,21 @@ class Login extends Component {
     userSignUp = (e) => {
         e.preventDefault();
         this.setState({ actionStep: 2 });
+        const userId = Math.round(1000000 + Math.random() * 1000000, 5);
         const userName = this.state.userName;
         const userEmail = this.state.userEmail;
         const userPassword = this.state.userPassword;
-        const userDetails = { userName, userEmail, userPassword };
+        const userDetails = { userId, userName, userEmail, userPassword, userTrips: [], userResponses: [] };
         const url = '/userSignUp';
         axios.post(url, { data: userDetails }
         ).then((res) => {
-            const userToken = res.data.token;
-            const userExpiration = new Date(new Date().getTime() + 60 * 60 * 1000);
+            const userToken = res.data.userClient.token;
+            const userExpiration = new Date(new Date().getTime() + 59 * 60 * 1000);
+            const userId = res.data.userClient.userId;
             localStorage.setItem('userExpiration', userExpiration);
             localStorage.setItem('userToken', userToken);
+            localStorage.setItem('userName', userName);
+            localStorage.setItem('userId', userId);
             this.setState({ isSignedIn: true });
             this.props.loginChange(true);
         }).catch((error) => {
@@ -150,7 +159,7 @@ class Login extends Component {
                     <form onSubmit={this.userSignUp} >
                         <div className="form-group" style={{ textAlign: "left" }}>
                             <label htmlFor="inputName">Full Name</label>
-                            <input type="email" className="form-control" defaultValue={this.state.userName} onChange={(e) => { this.setState({ userName: e.target.value, error: "" }) }} placeholder="enter full name" required={true} id="inputName" aria-describedby="nameHelp" />
+                            <input type="text" className="form-control" defaultValue={this.state.userName} onChange={(e) => { this.setState({ userName: e.target.value, error: "" }) }} placeholder="enter full name" required={true} id="inputName" aria-describedby="nameHelp" />
                         </div>
                         <div className="form-group" style={{ textAlign: "left" }}>
                             <label htmlFor="inputEmail">Email address</label>

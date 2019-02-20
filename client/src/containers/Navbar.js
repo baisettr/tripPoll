@@ -25,7 +25,6 @@ const NavBarComponent = (props) => {
                     </Nav>
                     <Nav>
                         {props.status ? <Link className="nav-link" to="/logout">Logout</Link> : <Link className="nav-link" to="/login">Login</Link>}
-                        <Link className="nav-link" to="/view">Contact</Link>
                     </Nav>
                 </Navbar.Collapse>
             </div>
