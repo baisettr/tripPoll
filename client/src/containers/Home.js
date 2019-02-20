@@ -13,36 +13,38 @@ const styles = {
 class Home extends Component {
     constructor(props) {
         super(props);
-        this.state = { actionStep: 0, myTrips: [], friendTrips: [] }
+        this.state = { error: "", actionStep: 0, userTrips: [], userResponses: [] }
     }
 
-    myTripsClickHandler = (e) => {
+    userTripsClickHandler = (e) => {
         e.preventDefault();
         this.setState({ actionStep: 3 });
-        const url = '/myTrips';
+        const url = '/userTrips';
         const userToken = localStorage.userToken;
         const headers = { Authorization: 'Bearer ' + userToken };
         axios.get(url, { headers }
         ).then((res) => {
-            //console.log(res.data)
-            this.setState({ actionStep: 1, myTrips: res.data });
+            //console.log(res.data.data)
+            this.setState({ actionStep: 1, userTrips: res.data.data });
         }).catch((error) => {
-            console.log(error);
+            const message = error.response.data.message;
+            this.setState({ error: message, actionStep: 4 });
         });
     }
 
-    friendsTripsClickHandler = (e) => {
+    userResponsesClickHandler = (e) => {
         e.preventDefault();
         this.setState({ actionStep: 3 });
-        const url = '/myTrips';
+        const url = '/userResponses';
         const userToken = localStorage.userToken;
         const headers = { Authorization: 'Bearer ' + userToken };
         axios.get(url, { headers }
         ).then((res) => {
-            console.log(res.data)
-            this.setState({ actionStep: 2, myTrips: res.data });
+            console.log(res.data.data)
+            this.setState({ actionStep: 2, userResponses: res.data.data });
         }).catch((error) => {
-            console.log(error);
+            const message = error.response.data.message;
+            this.setState({ error: message, actionStep: 4 });
         });
 
     }
@@ -63,7 +65,7 @@ class Home extends Component {
                             <Link className="btn-link" to="/propose">Propose a Trip</Link>
                         </h6>
                         <h6>Your planned trips {' '}
-                            <a className="btn-link" href="/#" onClick={this.myTripsClickHandler.bind(this)}>My Trips</a>
+                            <a className="btn-link" href="/#" onClick={this.userTripsClickHandler.bind(this)}>My Trips</a>
                         </h6>
                         <h6>Check a trip status {' '}
                             <Link className="btn-link" to="/view">View a Trip</Link>
@@ -74,7 +76,7 @@ class Home extends Component {
                     <div className="card-title">My Responses</div>
                     <div className="card-body">
                         <h6>Check your responses for friend's trips {' '}
-                            <a className="btn-link" href="/#" onClick={this.friendsTripsClickHandler.bind(this)}>My Responses</a>
+                            <a className="btn-link" href="/#" onClick={this.userResponsesClickHandler.bind(this)}>My Responses</a>
                         </h6>
                     </div>
                 </div>
@@ -107,18 +109,18 @@ class Home extends Component {
         this.props.history.push(url);
     }
 
-    MyTripsComponent = () =>
+    userTripsComponent = () =>
         <div className="jumbotron container" style={styles.divHome}>
             <h4>My Trips</h4>
 
             <div className="grid-container-home">
-                {this.state.myTrips.map((trip, index) => (
+                {this.state.userTrips.map((trip, index) => (
                     <div className="grid-item-home" key={index}>
                         <div style={{ display: 'inline-block' }} className="d-flex justify-content-between">
                             <h6 style={{ display: 'inline-block' }}>{trip.tripId} - {trip.tripDestination}</h6>
                             <div style={{ display: 'inline-block' }} >
-                                <button className="btn btn-light" onClick={this.viewTripClickHandler.bind(this, trip.tripId)}>View</button> | {' '}
-                                <button className="btn btn-dark" onClick={this.finalizeTripClickHandler.bind(this, trip.tripId)}>Finalize</button>
+                                <button className="btn btn-light" style={{ marginRight: '5px' }} onClick={this.viewTripClickHandler.bind(this, trip.tripId)}>View</button> | {' '}
+                                <button className="btn btn-dark" style={{ marginLeft: '5px' }} onClick={this.finalizeTripClickHandler.bind(this, trip.tripId)}>Finalize</button>
                             </div>
                         </div>
                     </div>
@@ -128,18 +130,18 @@ class Home extends Component {
             <h6>Proceed to <a href="/#" onClick={this.HomeClickHandler.bind(this)}>Home</a></h6>
         </div>
 
-    FriendsTripsComponent = () =>
+    userResponsesComponent = () =>
         <div className="jumbotron container" style={styles.divHome}>
             <h4>Friend's Trips</h4>
 
             <div className="grid-container-home">
-                {this.state.myTrips.map((trip, index) => (
+                {this.state.userResponses.map((trip, index) => (
                     <div className="grid-item-home" key={index}>
                         <div style={{ display: 'inline-block' }} className="d-flex justify-content-between">
                             <h6 style={{ display: 'inline-block' }}>{trip.tripId} - {trip.tripDestination}</h6>
                             <div style={{ display: 'inline-block' }} >
-                                <button className="btn btn-light" onClick={this.viewTripClickHandler.bind(this, trip.tripId)}>View Final Trip</button> | {' '}
-                                <button className="btn btn-dark" onClick={this.selectTripClickHandler.bind(this, trip.tripId)}>Select Options</button>
+                                <button className="btn btn-light" style={{ marginRight: '5px' }} onClick={this.viewTripClickHandler.bind(this, trip.tripId)}>View Final Trip</button> | {' '}
+                                <button className="btn btn-dark" style={{ marginLeft: '5px' }} onClick={this.selectTripClickHandler.bind(this, trip.tripId)}>Select Options</button>
                             </div>
                         </div>
                     </div>
@@ -151,12 +153,15 @@ class Home extends Component {
 
     SpinComponent = () => <div className='Loader divHome'>Loading...</div>
 
+    ErrorMessageComponent = () => <div><h6 style={{ color: 'red', textAlign: 'center' }}>{this.state.error}</h6></div>
+
     switchComponent = (e) => {
         switch (e) {
             case 0: return ""
-            case 1: return <this.MyTripsComponent />
-            case 2: return <this.FriendsTripsComponent />
+            case 1: return <this.userTripsComponent />
+            case 2: return <this.userResponsesComponent />
             case 3: return <this.SpinComponent />
+            case 4: return <this.ErrorMessageComponent />
             default: return <h4>Please <Link to="/login">Login</Link> Have a Nice Day!</h4>
         }
     }
