@@ -16,7 +16,7 @@ class View extends Component {
     constructor(props) {
         super(props);
         const tripId = props.location.search.split('=')[1];
-        this.state = { error: "", tripId: tripId, finalTrip: {}, activeStep: 0, destination: "", selectedAirbnbPlaces: [], selectedGooglePlaces: [], listAirbnbPlaces: [], listGooglePlaces: [] };
+        this.state = { error: "", user: {}, tripId: tripId, finalTrip: {}, activeStep: 0, destination: "", selectedAirbnbPlaces: [], selectedGooglePlaces: [], listAirbnbPlaces: [], listGooglePlaces: [] };
     }
 
     componentDidMount() {
@@ -39,8 +39,9 @@ class View extends Component {
         axios.get(url, { headers }
         ).then((res) => {
             const trip = res.data;
+            console.log(trip);
             if (trip.finalTrip) {
-                const { finalTrip, tripDestination, tripListGooglePlaces, tripListAirbnbPlaces } = trip;
+                const { tripOwner, finalTrip, tripDestination, tripListGooglePlaces, tripListAirbnbPlaces } = trip;
                 let selectedGooglePlaces = [];
                 for (const i in tripListGooglePlaces) {
                     const place = tripListGooglePlaces[i];
@@ -56,7 +57,7 @@ class View extends Component {
                     }
                 };
 
-                this.setState({ activeStep: 1, destination: tripDestination, listGooglePlaces: tripListGooglePlaces, listAirbnbPlaces: tripListAirbnbPlaces, selectedAirbnbPlaces, selectedGooglePlaces, finalTrip });
+                this.setState({ activeStep: 1, user: tripOwner, destination: tripDestination, listGooglePlaces: tripListGooglePlaces, listAirbnbPlaces: tripListAirbnbPlaces, selectedAirbnbPlaces, selectedGooglePlaces, finalTrip });
             } else { this.setState({ activeStep: 2 }); }
         }).catch((error) => {
             const message = error.response.data.message;
@@ -132,7 +133,6 @@ class View extends Component {
 
     ShareAndCarComponent = () =>
         <div>
-            <br />
             <h6>Trip Share and Car Details</h6>
             <br />
             <label style={{ paddingRight: '10px' }}>Total share for the Trip (in $) - {this.state.finalTrip.userOtherOptions.userShare}</label>
@@ -144,15 +144,21 @@ class View extends Component {
 
     TripHomeComponent = () =>
         <div>
-            <h6>Finalized Trip Details</h6>
+            <h6>Trip Details</h6>
             <br />
             <div>
-                <h6>Destination : {this.state.destination}</h6>
+                <label>Destination : {this.state.destination}</label>
+            </div>
+            <div>
+                <label>Trip Owner : {this.state.user.userName} </label>
+                <br />
+                <label>Other Listed Trip Friends </label>
+                {this.state.finalTrip.users.map((u, index) => <h6 key={index}>{u}</h6>)}
             </div>
         </div>
     DateComponent = () => <div >
         <h6>Trip Dates</h6>
-        <DayPicker selectedDays={this.state.finalTrip.selectedDays.map((day) => new Date(day))} disabledDays={{ before: new Date() }} />
+        <DayPicker month={new Date(this.state.finalTrip.selectedDays[0])} selectedDays={this.state.finalTrip.selectedDays.map((day) => new Date(day))} />
     </div>
 
     DisplayLinks = () => {
