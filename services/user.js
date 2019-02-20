@@ -34,7 +34,7 @@ function userSignIn(userDetails) {
                 if (res.data.length) {
                     const userFullDetails = res.data[0];
                     if (userFullDetails.userPassword === userDetails.userPassword) {
-                        console.log("success");
+                        console.log("success login");
                         const user = { userId: userFullDetails.userId, userOId: userFullDetails._id.$oid };
                         const token = jwt.sign(user, keys.jwtKey, { algorithm: 'HS256', expiresIn: 60 * 60 });
                         //console.log(token);
@@ -108,11 +108,9 @@ function userNewResponse(newResponse, user) {
             .then((res) => {
                 //console.log(res.data);
                 const userOldResponses = res.data[0].userResponses;
-                console.log(userOldResponses);
                 let newUserResponses = [];
                 userOldResponses.forEach((o) => { if (o.tripId !== newResponse.tripId) { newUserResponses.push(o) } });
                 newUserResponses.push(newResponse);
-                console.log(newUserResponses);
                 const urlNew = 'https://api.mlab.com/api/1/databases/tripo/collections/users/' + userOId + '?apiKey=' + keys.mlabAPIKey;
                 axios.put(urlNew, { "$set": { "userResponses": newUserResponses } })
                     .then((res) => {
@@ -170,28 +168,3 @@ function userResponses(user) {
 }
 
 module.exports = { userSignUp, userSignIn, userDetails, userNewTrip, userNewResponse, userTrips, userResponses };
-
-
-
-
-
-/* let userSIgnUpDetails = { userId: 2345, password: 'gbhnjnjjn7', userName: 'hello', userEmail: 'cfvghb@fgh.com' };
-let userSIgnInDetails = { userEmail: "cfvghb@fgh.com", password: 'gbhnjnjjn7' };
-userSignUp(userSIgnUpDetails).then((e) => console.log(e));
-userSignIn(userSIgnInDetails).then((e) => console.log(e));
-
-function getJwtToken(user) {
-    return new Promise((resolve, reject) => {
-        jwt.sign(user, keys.jwtKey, { algorithm: 'HS256', expiresIn: 60 * 60 }, function (err, token) {
-            resolve(token);
-        });
-    });
-};
-
-function verifyJwtToken(token) {
-    return new Promise((resolve, reject) => {
-        jwt.verify(token, keys.jwtKey, { algorithm: 'HS256' }, function (err, user) {
-            resolve(user);
-        });
-    });
-}; */
