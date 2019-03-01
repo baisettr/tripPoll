@@ -191,7 +191,7 @@ class Propose extends Component {
 
     DisplayLinks = () =>
         <div >
-            <div style={{ display: "inline-flex" }}>
+            <div>
                 <div className="btn">
                     <FacebookShareButton className="btn" url={this.state.tripSelectionUrl} quote={"Please select trip options for " + this.state.destination} >
                         <FacebookIcon size={40} round={true} />

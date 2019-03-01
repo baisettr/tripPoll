@@ -81,7 +81,7 @@ class View extends Component {
 
     ViewHomeComponent = () =>
         <div>
-            <h4>Enter the Trip Id associated with the trip</h4>
+            <h4>Enter the trip id associated with the trip</h4>
             <br />
             <h6 style={{ color: 'red' }}>{this.state.error}</h6>
             <form onSubmit={this.getTripDetailsFromUserInput}>
@@ -170,7 +170,7 @@ class View extends Component {
 
     DisplayLinks = () =>
         <div >
-            <div style={{ display: "inline-flex" }}>
+            <div>
                 <div className="btn">
                     <FacebookShareButton className="btn" url={this.state.tripSelectionUrl} quote={"Please select trip options for " + this.state.destination} >
                         <FacebookIcon size={40} round={true} />
@@ -245,7 +245,7 @@ class View extends Component {
                 <div>
                     {this.switchComponent(this.state.activeStep)}
                 </div>
-                <br /><br />
+                <br /><br /><br /><br />
                 <h6>Proceed to <Link to="/">Home</Link></h6>
             </div>
         );

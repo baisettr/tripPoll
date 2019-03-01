@@ -55,7 +55,7 @@ class Select extends Component {
 
     SelectHomeComponent = () =>
         <div>
-            <h4>Enter the Trip Id associated with the trip</h4>
+            <h4>Enter the trip id associated with the trip</h4>
             <br />
             <h6 style={{ color: 'red' }}>{this.state.error}</h6>
             <form onSubmit={this.getTripDetailsFromUserInput}>
