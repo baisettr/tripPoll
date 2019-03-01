@@ -5,12 +5,12 @@ import { withRouter, Link } from 'react-router-dom';
 class Login extends Component {
     constructor(props) {
         super(props);
-        this.state = { isSignedIn: false, userName: "", userEmail: "", userId: "", userPassword: "", error: '', userDetails: {}, actionStep: 0 };
+        this.state = { isSignedIn: false, userName: "", userEmail: "", userId: "", userPassword: "", error: '', userDetails: {}, actionStep: 0, loadSpin: false };
     }
 
     userSignIn = (e) => {
         e.preventDefault();
-        this.setState({ actionStep: 2 });
+        this.setState({ loadSpin: true });
         const userEmail = this.state.userEmail;
         const userPassword = this.state.userPassword;
         const userCredentials = { userEmail, userPassword };
@@ -30,14 +30,14 @@ class Login extends Component {
             this.setState({ isSignedIn: true });
             this.props.loginChange(true);
         }).catch((error) => {
-            const message = error.response.data.message;
-            this.setState({ error: message, actionStep: 0 });
+            const message = error.response.data.message || "Internal error. Please try again later!";
+            this.setState({ error: message, loadSpin: false });
         });
     }
 
     userSignUp = (e) => {
         e.preventDefault();
-        this.setState({ actionStep: 2 });
+        this.setState({ loadSpin: true });
         const userId = Math.round(1000000 + Math.random() * 1000000, 5);
         const userName = this.state.userName;
         const userEmail = this.state.userEmail;
@@ -56,8 +56,8 @@ class Login extends Component {
             this.setState({ isSignedIn: true });
             this.props.loginChange(true);
         }).catch((error) => {
-            const message = error.response.data.message;
-            this.setState({ error: message, actionStep: 1 });
+            const message = error.response.data.message || "Internal error. Please try again later!";
+            this.setState({ error: message, loadSpin: false });
         });
     }
 
@@ -82,24 +82,20 @@ class Login extends Component {
         e.preventDefault();
         this.setState({ actionStep: 0 });
     }
-    LoginComponent = () =>
-        <div>
-            <h4>Sign in Trip Poll!</h4>
-            <br />
-            <h6 style={{ color: 'red' }}>{this.state.error}</h6>
-            <div >
-                <form onSubmit={this.userSignIn} >
-                    <label className="inputLabel">Email Id</label>
-                    <input className="inputLogin" defaultValue={this.state.userEmail} onChange={(e) => { this.setState({ userEmail: e.target.value, error: "" }) }} placeholder="enter username" required={true} />
-                    <br />
-                    <label className="inputLabel">Password</label>
-                    <input className="inputLogin" type="password" defaultValue={this.state.userPassword} onChange={(e) => { this.setState({ userPassword: e.target.value, error: "" }) }} placeholder="enter password" required={true} />
-                    <br />
-                    <button className="btn btn-dark">Sign In</button>
-                </form>
-            </div>
-            <br />
-            <h6>Please <a href="/#" onClick={this.SignUpShowHandler.bind(this)}>SignUp</a> if you don't have an account!</h6>
+
+    LoginForm = () =>
+        <div >
+            <form onSubmit={this.userSignIn} >
+                <div className="form-group" style={{ textAlign: "left" }}>
+                    <label htmlFor="exampleInputEmail1">Email address</label>
+                    <input type="email" className="form-control" defaultValue={this.state.userEmail} onChange={(e) => { this.setState({ userEmail: e.target.value, error: "" }) }} placeholder="enter email" required={true} id="exampleInputEmail1" aria-describedby="emailHelp" />
+                </div>
+                <div className="form-group" style={{ textAlign: "left" }}>
+                    <label htmlFor="exampleInputPassword1">Password</label>
+                    <input type="password" className="form-control" defaultValue={this.state.userPassword} onChange={(e) => { this.setState({ userPassword: e.target.value, error: "" }) }} placeholder="enter password" required={true} id="exampleInputPassword1" />
+                </div>
+                <button className="btn btn-dark">Sign in</button>
+            </form>
         </div>
 
     LoginCardComponent = () =>
@@ -107,74 +103,46 @@ class Login extends Component {
             <div className="card-title h4">Sign in Trip Poll!</div>
             <div className="card-body">
                 <h6 style={{ color: 'red' }}>{this.state.error}</h6>
-                <div >
-                    <form onSubmit={this.userSignIn} >
-                        <div className="form-group" style={{ textAlign: "left" }}>
-                            <label htmlFor="exampleInputEmail1">Email address</label>
-                            <input type="email" className="form-control" defaultValue={this.state.userEmail} onChange={(e) => { this.setState({ userEmail: e.target.value, error: "" }) }} placeholder="enter email" required={true} id="exampleInputEmail1" aria-describedby="emailHelp" />
-                        </div>
-                        <div className="form-group" style={{ textAlign: "left" }}>
-                            <label htmlFor="exampleInputPassword1">Password</label>
-                            <input type="password" className="form-control" defaultValue={this.state.userPassword} onChange={(e) => { this.setState({ userPassword: e.target.value, error: "" }) }} placeholder="enter password" required={true} id="exampleInputPassword1" />
-                        </div>
-                        <button className="btn btn-dark">Sign in</button>
-                    </form>
-                </div>
+                {this.state.loadSpin ? <this.SpinComponent /> : <this.LoginForm />}
                 <br />
                 <h6>Please <a href="/#" onClick={this.SignUpShowHandler.bind(this)}>Sign up</a> if you don't have an account</h6>
             </div>
+
+            <br /><br />
+            <h6>Proceed to <Link to="/">Home</Link></h6>
         </div>
 
-
-    SignUpComponent = () =>
-        <div>
-            <h4>Sign up Trip Poll!</h4>
-            <br />
-            <h6 style={{ color: 'red' }}>{this.state.error}</h6>
-            <div >
-                <form onSubmit={this.userSignUp} >
-                    <label className="inputLabel">Full Name</label>
-                    <input className="inputLogin" defaultValue={this.state.userName} onChange={(e) => { this.setState({ userName: e.target.value, error: "" }) }} placeholder="enter username" required={true} />
-                    <br />
-                    <label className="inputLabel">Email Id</label>
-                    <input className="inputLogin" defaultValue={this.state.userEmail} onChange={(e) => { this.setState({ userEmail: e.target.value, error: "" }) }} placeholder="enter email" required={true} />
-                    <br />
-                    <label className="inputLabel">Password</label>
-                    <input className="inputLogin" type="password" defaultValue={this.state.userPassword} onChange={(e) => { this.setState({ userPassword: e.target.value, error: "" }) }} placeholder="enter password" required={true} />
-                    <br />
-                    <button className="btn btn-dark">Sign Up</button>
-                </form>
-            </div>
-            <br />
-            <h6>Please <a href="/#" onClick={this.SignInShowHandler.bind(this)}>SignIn</a> if you already have an account!</h6>
+    SignUpForm = () =>
+        <div >
+            <form onSubmit={this.userSignUp} >
+                <div className="form-group" style={{ textAlign: "left" }}>
+                    <label htmlFor="inputName">Full Name</label>
+                    <input type="text" className="form-control" defaultValue={this.state.userName} onChange={(e) => { this.setState({ userName: e.target.value, error: "" }) }} placeholder="enter full name" required={true} id="inputName" aria-describedby="nameHelp" />
+                </div>
+                <div className="form-group" style={{ textAlign: "left" }}>
+                    <label htmlFor="inputEmail">Email address</label>
+                    <input type="email" className="form-control" defaultValue={this.state.userEmail} onChange={(e) => { this.setState({ userEmail: e.target.value, error: "" }) }} placeholder="enter email" required={true} id="inputEmail" aria-describedby="emailHelp" />
+                </div>
+                <div className="form-group" style={{ textAlign: "left" }}>
+                    <label htmlFor="inputPassword">Password</label>
+                    <input type="password" className="form-control" defaultValue={this.state.userPassword} onChange={(e) => { this.setState({ userPassword: e.target.value, error: "" }) }} placeholder="enter password" required={true} id="inputPassword" />
+                </div>
+                <button className="btn btn-dark">Sign up</button>
+            </form>
         </div>
-
 
     SignUpCardComponent = () =>
         <div className="cardLogin">
             <div className="card-title h4">Sign up Trip Poll!</div>
             <div className="card-body">
                 <h6 style={{ color: 'red' }}>{this.state.error}</h6>
-                <div >
-                    <form onSubmit={this.userSignUp} >
-                        <div className="form-group" style={{ textAlign: "left" }}>
-                            <label htmlFor="inputName">Full Name</label>
-                            <input type="text" className="form-control" defaultValue={this.state.userName} onChange={(e) => { this.setState({ userName: e.target.value, error: "" }) }} placeholder="enter full name" required={true} id="inputName" aria-describedby="nameHelp" />
-                        </div>
-                        <div className="form-group" style={{ textAlign: "left" }}>
-                            <label htmlFor="inputEmail">Email address</label>
-                            <input type="email" className="form-control" defaultValue={this.state.userEmail} onChange={(e) => { this.setState({ userEmail: e.target.value, error: "" }) }} placeholder="enter email" required={true} id="inputEmail" aria-describedby="emailHelp" />
-                        </div>
-                        <div className="form-group" style={{ textAlign: "left" }}>
-                            <label htmlFor="inputPassword">Password</label>
-                            <input type="password" className="form-control" defaultValue={this.state.userPassword} onChange={(e) => { this.setState({ userPassword: e.target.value, error: "" }) }} placeholder="enter password" required={true} id="inputPassword" />
-                        </div>
-                        <button className="btn btn-dark">Sign up</button>
-                    </form>
-                </div>
+                {this.state.loadSpin ? <this.SpinComponent /> : <this.SignUpForm />}
                 <br />
                 <h6>Please <a href="/#" onClick={this.SignInShowHandler.bind(this)}>Sign in</a> if you already have an account!</h6>
             </div>
+
+            <br /><br />
+            <h6>Proceed to <Link to="/">Home</Link></h6>
         </div>
 
     SpinComponent = () => <div className='Loader'>Loading...</div>
@@ -183,7 +151,6 @@ class Login extends Component {
         switch (e) {
             case 0: return <this.LoginCardComponent />
             case 1: return <this.SignUpCardComponent />
-            case 2: return <this.SpinComponent />
             default: return <h4>Please <Link to="/login" >Login</Link></h4>
         }
     }
@@ -199,8 +166,6 @@ class Login extends Component {
                 <div className="divFlexLogin">
                     {this.switchComponent(this.state.actionStep)}
                 </div>
-                <br /><br />
-                <h6>Proceed to <Link to="/">Home</Link></h6>
             </div>
         );
     }
