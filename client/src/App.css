@@ -129,6 +129,33 @@
   color: black;
 }
 
+.footer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 1rem;
+  background-color: #efefef;
+  text-align: center;
+}
+
+.footer span {
+  display: block;
+}
+
+.footer span a{
+  color: darkorange;
+}
+
+@media screen and (max-width:800px) {
+  .mobile-nav-show {
+    visibility: visible !important;
+  }
+  body{
+  margin-bottom: 3rem;
+  }
+}
+
 /* @media screen and (max-width:800px) {
   .grid-container-home {
     display: grid;
