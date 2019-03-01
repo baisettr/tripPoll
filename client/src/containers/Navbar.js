@@ -7,7 +7,10 @@ const NavBarComponent = (props) => {
     return (
         <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
             <div className="container" >
-                <Link className="navbar-brand" to="/">Trip Poll</Link>
+                <Link className="navbar-brand" to="/">
+                    <img src="./logo1.jpg" alt="logo" style={{ width: "25px", height: '25px', marginRight: '10px' }}></img>
+                    Trip Poll
+                </Link>
                 <Navbar.Toggle aria-controls="responsive-navbar-nav" />
                 <Navbar.Collapse id="responsive-navbar-nav">
                     <Nav className="mr-auto">

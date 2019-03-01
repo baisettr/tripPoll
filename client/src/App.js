@@ -7,6 +7,7 @@ import Propose from './containers/Propose';
 import Select from './containers/Select';
 import View from './containers/View';
 import NavBar from './containers/Navbar';
+import Iconbar from './containers/Iconbar';
 import Login from './containers/Login';
 import Logout from './containers/Logout';
 
@@ -44,7 +45,22 @@ class App extends Component {
     return (
       <div className="jumbotron container divHome">
         <h4>Trip Poll - Plan before you ride!</h4>
+        <br />
+        <img src="./logo1.jpg" alt="logo" style={{ width: "350px" }}></img>
+        <br /><br /><br /><br />
+        <div >
+          <Link to="/login"><button className="btn btn-dark" >Proceed to Login</button></Link>
+        </div>
       </div>)
+  }
+
+  FooterComponent = () => {
+    return (
+      <div className="footer">
+        <span className="copyright">Copyright © <a href="https://rkbeavs.me">Rama Krishna Baisetti</a>. 2019 • All rights reserved.</span>
+        <span className="wordpress">Than You for visting us! Please <a href="mailto:baisettr@oregonstate.edu">contact</a> for support</span>
+      </div>
+    )
   }
 
   HandleLoginComponent = () => {
@@ -93,6 +109,8 @@ class App extends Component {
       <React.Fragment>
         <NavBar status={this.state.userAuth} />
         <this.RouteComponent />
+        <this.FooterComponent />
+        <Iconbar status={this.state.userAuth} />
       </React.Fragment>
     );
   }
