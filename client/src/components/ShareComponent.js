@@ -47,7 +47,7 @@ const ShareComponent = (props) => {
             <br /><br /><br />
             <div style={{ display: "inline-flex" }}>
                 <input id="tripSelectionUrl" className="form-control inputPlace" defaultValue={tripSelectionUrl} readOnly />
-                <button className="btn btn-dark" onClick={CopyLinkSelect}> Copy Link</button>
+                <button className="btn btn-light" onClick={CopyLinkSelect}> Copy Link</button>
             </div>
         </div>
     )

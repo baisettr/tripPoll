@@ -40,7 +40,7 @@ class Home extends Component {
         const headers = { Authorization: 'Bearer ' + userToken };
         axios.get(url, { headers }
         ).then((res) => {
-            console.log(res.data.data)
+            //console.log(res.data.data)
             this.setState({ actionStep: 2, userResponses: res.data.data });
         }).catch((error) => {
             const message = error.response.data.message;

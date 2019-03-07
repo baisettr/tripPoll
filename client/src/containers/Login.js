@@ -68,9 +68,9 @@ class Login extends Component {
         const url = '/userDetails';
         axios.get(url, { headers }
         ).then((res) => {
-            console.log(res.data);
+            //console.log(res.data);
         }).catch((error) => {
-            console.log(error.response.data);
+            //console.log(error.response.data);
         });
     }
 

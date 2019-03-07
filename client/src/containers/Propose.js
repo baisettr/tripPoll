@@ -33,7 +33,7 @@ class Propose extends Component {
             this.setState({ suggestedPlaces: sugPlaces });
 
         }).catch((error) => {
-            console.log(error);
+            //console.log(error);
         });
     }
 
@@ -64,7 +64,7 @@ class Propose extends Component {
             const googleListings = res.data;
             this.setState({ listGooglePlaces: googleListings });
         }).catch((error) => {
-            console.log(error);
+            //console.log(error);
         });
     }
 
@@ -75,7 +75,7 @@ class Propose extends Component {
             const restaurants = res.data;
             this.setState({ listRestaurants: restaurants });
         }).catch((error) => {
-            console.log(error);
+            //console.log(error);
         });
     }
 
@@ -97,7 +97,7 @@ class Propose extends Component {
             });
             this.setState({ listAirbnbPlaces: airbnbListings })
         }).catch((error) => {
-            console.log(error);
+            //console.log(error);
         });
     }
 
@@ -121,10 +121,10 @@ class Propose extends Component {
         const headers = { Authorization: 'Bearer ' + userToken };
         axios.post(url, { data: trip }, { headers }
         ).then((res) => {
-            console.log("Saved");
-            console.log(res.data);
+            //console.log("Saved");
+            //console.log(res.data);
         }).catch((error) => {
-            console.log(error);
+            //console.log(error);
         });
     }
 
@@ -135,10 +135,10 @@ class Propose extends Component {
         const headers = { Authorization: 'Bearer ' + userToken };
         axios.post(url, { data: newTrip }, { headers }
         ).then((res) => {
-            console.log("User Trip Saved");
-            console.log(res.data);
+            //console.log("User Trip Saved");
+            //console.log(res.data);
         }).catch((error) => {
-            console.log(error);
+            //console.log(error);
         });
     }
 
