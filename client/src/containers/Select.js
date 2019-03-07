@@ -4,6 +4,7 @@ import DayPicker, { DateUtils } from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
 import AirbnbTest from '../components/AirbnbComponent';
 import GoogleTest from '../components/GoogleComponent';
+import RestaurantTest from '../components/RestaurantComponent';
 import { Link, withRouter } from 'react-router-dom';
 
 const styles = {
@@ -19,7 +20,7 @@ class Select extends Component {
         super(props);
         const userId = localStorage.getItem('userId');
         const userName = localStorage.getItem('userName');
-        this.state = { error: '', user: { userId, userName }, tripId: "", tripOId: '', activeStep: 0, width: 20, destination: "", userSelection: {}, tripSelectedOptions: {}, tripSelectedDays: [], selectedDays: [], listAirbnbPlaces: [], listGooglePlaces: [], selectedGooglePlaces: {}, selectedAirbnbPlaces: {}, userOtherOptions: { userShare: 0, userHasCar: false, userCarFit: 0 } };
+        this.state = { error: '', user: { userId, userName }, tripOwner: {}, tripId: "", tripOId: '', activeStep: 0, width: 0, destination: "", userSelection: {}, tripSelectedOptions: {}, tripSelectedDays: [], selectedDays: [], listAirbnbPlaces: [], listGooglePlaces: [], listRestaurants: [], selectedRestaurants: {}, selectedGooglePlaces: {}, selectedAirbnbPlaces: {}, userOtherOptions: { userShare: 0, userHasCar: false, userCarFit: 0 } };
     }
 
     componentDidMount() {
@@ -30,7 +31,7 @@ class Select extends Component {
         }
         const tripId = queryParams["tripId"];
         if (tripId) {
-            this.setState({ tripId, activeStep: 7 });
+            this.setState({ tripId, activeStep: 8 });
             this.getTripDetails(tripId);
         }
     }
@@ -42,11 +43,11 @@ class Select extends Component {
         axios.get(url, { headers }
         ).then((res) => {
             const trip = res.data;
-            const { _id, tripDestination, tripSelectedDays, tripListGooglePlaces, tripListAirbnbPlaces, tripSelectedOptions } = trip;
+            const { _id, tripOwner, tripDestination, tripSelectedDays, tripListGooglePlaces, tripListAirbnbPlaces, tripListRestaurants, tripSelectedOptions } = trip;
             const userId = this.state.user.userId;
-            const userSelection = tripSelectedOptions[userId] ? tripSelectedOptions[userId] : { selectedDays: [], selectedGooglePlaces: {}, selectedAirbnbPlaces: {}, userOtherOptions: { userShare: 0, userHasCar: false, userCarFit: 0 } };
-            const { selectedGooglePlaces, selectedAirbnbPlaces, userOtherOptions, selectedDays } = userSelection;
-            this.setState({ activeStep: 1, tripOId: _id.$oid, destination: tripDestination, tripSelectedDays, selectedDays, selectedGooglePlaces, selectedAirbnbPlaces, userOtherOptions, listGooglePlaces: tripListGooglePlaces, listAirbnbPlaces: tripListAirbnbPlaces, tripSelectedOptions, userSelection });
+            const userSelection = tripSelectedOptions[userId] ? tripSelectedOptions[userId] : tripSelectedOptions[tripOwner.userId];
+            const { selectedGooglePlaces, selectedRestaurants, selectedAirbnbPlaces, userOtherOptions, selectedDays } = userSelection;
+            this.setState({ activeStep: 1, tripOId: _id.$oid, tripOwner, destination: tripDestination, tripSelectedDays, selectedDays, selectedGooglePlaces, selectedAirbnbPlaces, userOtherOptions, listGooglePlaces: tripListGooglePlaces, listAirbnbPlaces: tripListAirbnbPlaces, selectedRestaurants, listRestaurants: tripListRestaurants, tripSelectedOptions, userSelection });
         }).catch((error) => {
             const message = error.response.data.message;
             this.setState({ error: message, activeStep: 0 })
@@ -67,7 +68,7 @@ class Select extends Component {
 
     getTripDetailsFromUserInput = (e) => {
         e.preventDefault();
-        this.setState({ activeStep: 7 });
+        this.setState({ activeStep: 8 });
         const tripId = this.state.tripId;
         this.getTripDetails(tripId);
     }
@@ -155,7 +156,7 @@ class Select extends Component {
     generateTripOptions = () => {
         const userId = this.state.user.userId;
         const { tripSelectedOptions } = this.state;
-        const newUserSelection = { userName: this.state.user.userName, selectedGooglePlaces: this.state.selectedGooglePlaces, selectedAirbnbPlaces: this.state.selectedAirbnbPlaces, selectedDays: this.state.selectedDays, userOtherOptions: this.state.userOtherOptions };
+        const newUserSelection = { userName: this.state.user.userName, selectedGooglePlaces: this.state.selectedGooglePlaces, selectedAirbnbPlaces: this.state.selectedAirbnbPlaces, selectedRestaurants: this.state.selectedRestaurants, selectedDays: this.state.selectedDays, userOtherOptions: this.state.userOtherOptions };
 
         tripSelectedOptions[userId] = newUserSelection;
 
@@ -178,7 +179,7 @@ class Select extends Component {
 
     saveUserNewResponse = async (tripId, tripDestination) => {
         const url = '/userNewResponse';
-        const newTrip = { tripId, tripDestination };
+        const newTrip = { tripId, tripDestination, tripResponseDate: new Date() };
         const userToken = localStorage.userToken;
         const headers = { Authorization: 'Bearer ' + userToken };
         axios.post(url, { data: newTrip }, { headers }
@@ -193,7 +194,8 @@ class Select extends Component {
     TripSuccessComponent = () =>
         <div>
             <h4>Trip Options Saved Successful!</h4>
-            <br />
+            <br /><br />
+            <p>Thank You for selecting the trip options. The trip owner <span style={{ color: "brown" }}>{this.state.tripOwner.userName} </span> will finalize the trip!</p>
         </div>
 
     handleGoogleClick = (place, e) => {
@@ -238,6 +240,27 @@ class Select extends Component {
         this.setState({ selectedAirbnbPlaces });
     }
 
+    handleRestaurantClick = (restaurant, e) => {
+        e.preventDefault();
+        const { selectedRestaurants } = this.state;
+        if (selectedRestaurants[restaurant.id] !== 1) {
+            selectedRestaurants[restaurant.id] = 1;
+            if (e.target.parentElement.id === 'restaurantGrid') {
+                e.target.parentElement.className = 'card grid-item-selected'
+            } else if (e.target.id === 'restaurantGrid') {
+                e.target.className = 'card grid-item-selected'
+            };
+        } else {
+            delete selectedRestaurants[restaurant.id];
+            if (e.target.parentElement.id === 'restaurantGrid') {
+                e.target.parentElement.className = 'card grid-item'
+            } else if (e.target.id === 'restaurantGrid') {
+                e.target.className = 'card grid-item'
+            };
+        }
+        this.setState({ selectedRestaurants });
+    }
+
     SpinComponent = () => <div className='Loader'>Loading...</div>
 
     switchComponent = (e) => {
@@ -247,9 +270,10 @@ class Select extends Component {
             case 2: return <this.DateComponent />
             case 3: return <GoogleTest destination={this.state.destination} listGooglePlaces={this.state.listGooglePlaces} selectedGooglePlaces={this.state.selectedGooglePlaces} handleGoogleClick={this.handleGoogleClick} />
             case 4: return <AirbnbTest destination={this.state.destination} listAirbnbPlaces={this.state.listAirbnbPlaces} selectedAirbnbPlaces={this.state.selectedAirbnbPlaces} handleAirbnbClick={this.handleAirbnbClick} />
-            case 5: return <this.ShareAndCarComponent />
-            case 6: return <this.TripSuccessComponent />
-            case 7: return <this.SpinComponent />
+            case 5: return <RestaurantTest destination={this.state.destination} listRestaurants={this.state.listRestaurants} selectedRestaurants={this.state.selectedRestaurants} handleRestaurantClick={this.handleRestaurantClick} />
+            case 6: return <this.ShareAndCarComponent />
+            case 7: return <this.TripSuccessComponent />
+            case 8: return <this.SpinComponent />
             default: return <h4>Please <Link to="/login" >Login</Link></h4>
         }
     }
@@ -258,7 +282,7 @@ class Select extends Component {
         return (
             <div className="container">
                 <br />
-                {this.state.activeStep >= 1 && this.state.activeStep <= 5 ? <div className="progress">
+                {this.state.activeStep >= 1 && this.state.activeStep <= 6 ? <div className="progress">
                     <div ref="progressTrip" className="progress-bar progress-bar-striped bg-dark" role="progressbar" style={{ width: this.state.width + '%' }} aria-valuemin="0" aria-valuemax="100">{this.state.width}%</div>
                 </div> : <div></div>}
                 <div className="jumbotron container" style={styles.divHome}>
@@ -266,7 +290,7 @@ class Select extends Component {
                         <div>
                             {this.switchComponent(this.state.activeStep)}
                             <br /><br />
-                            {this.state.activeStep > 0 && this.state.activeStep < 6 ?
+                            {this.state.activeStep > 0 && this.state.activeStep < 7 ?
                                 <div className="d-flex justify-content-around">
 
                                     <button className="btn btn-light" onClick={() => {
@@ -274,7 +298,7 @@ class Select extends Component {
                                         this.setState({ activeStep: this.state.activeStep - 1, width: this.state.width - 20 })
                                     }} disabled={this.state.activeStep === 0}>Back</button>
 
-                                    {this.state.activeStep !== 5 ?
+                                    {this.state.activeStep !== 6 ?
                                         <button className="btn btn-dark" onClick={() => {
                                             this.refs.progressTrip.style.width = this.state.width + 20 + '%';
                                             this.setState({ activeStep: this.state.activeStep + 1, width: this.state.width + 20 })
