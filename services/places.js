@@ -24,7 +24,62 @@ function getPlaces(destination) {
         const url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=' + destination + '+tourist+attractions&language=en&key=' + keys.googleAPIKey;
         axios.get(url)
             .then((res) => {
-                resolve(res.data);
+                getPlaceUrl(res.data.results)
+                    .then((googlePlaces) => {
+                        resolve(googlePlaces);
+                    })
+            })
+            .catch((err) => {
+                reject("Internal error. Please try again!");
+            });
+    });
+}
+
+function getPlaceUrl(places) {
+    return new Promise((resolve, reject) => {
+        const googlePlaces = places;
+        let urls = [];
+        let indices = [];
+        googlePlaces.forEach((e, index) => {
+            if (e.photos) {
+                let reference = e.photos[0].photo_reference;
+                let url = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=639&maxheight=426&photoreference=" + reference + "&key=AIzaSyDiFYXE3HoT8ux5MqVFaeYLDLQcZvhAqqs";
+                urls.push(axios.get(url))
+            } else {
+                indices.push(index);
+            }
+        })
+
+        if (indices.length) {
+            indices.forEach((i) => {
+                googlePlaces.splice(i, 1);
+            })
+        }
+
+
+        axios.all(urls)
+            .then(axios.spread(function () {
+                for (e in arguments) {
+                    googlePlaces[e]["photoUrl"] = arguments[e].request.res.responseUrl;
+                }
+                resolve(googlePlaces);
+            }))
+            .catch((err) => {
+                reject("Internal error. Please try again!");
+            });
+    });
+}
+
+
+function getRestaurants(destination) {
+    return new Promise((resolve, reject) => {
+        const url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=best+places+to+eat+' + destination + '&language=en&key=' + keys.googleAPIKey;
+        axios.get(url)
+            .then((res) => {
+                getPlaceUrl(res.data.results)
+                    .then((restaurants) => {
+                        resolve(restaurants);
+                    })
             })
             .catch((err) => {
                 reject("Internal error. Please try again!");
@@ -68,4 +123,4 @@ function getListings(destination) {
     });
 }
 
-module.exports = { getPlaceSuggestions, getPlaces, getListings };
+module.exports = { getPlaceSuggestions, getPlaces, getRestaurants, getListings };

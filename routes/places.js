@@ -24,6 +24,17 @@ module.exports = app => {
             });
     });
 
+    app.get('/restaurants', (req, res) => {
+        const dest = req.query.dest.split(', ').join('+');
+        place.getRestaurants(dest)
+            .then((data) => {
+                res.send(data);
+            })
+            .catch((err) => {
+                res.status(400).json({ message: err });
+            });
+    });
+
     app.get('/listings', (req, res) => {
         const dest = req.query.dest;
         place.getListings(dest)
