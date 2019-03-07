@@ -58,7 +58,7 @@ class App extends Component {
     return (
       <div className="footer">
         <span className="copyright">Copyright © <a href="https://rkbeavs.me">Rama Krishna Baisetti</a>. 2019 • All rights reserved.</span>
-        <span className="wordpress">Than You for visting us! Please <a href="mailto:baisettr@oregonstate.edu">contact</a> for support</span>
+        <span className="support">Than You for visting us! Please <a href="mailto:baisettr@oregonstate.edu">contact</a> for support</span>
       </div>
     )
   }
