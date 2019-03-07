@@ -86,7 +86,7 @@ class Final extends Component {
     getTripDetails = async (tripId) => {
         const userToken = localStorage.userToken;
         const headers = { Authorization: 'Bearer ' + userToken };
-        const url = '/trpo/trip?tripId=' + tripId;
+        const url = '/trip?tripId=' + tripId;
         axios.get(url, { headers }
         ).then((res) => {
             const trip = res.data;
@@ -274,7 +274,7 @@ class Final extends Component {
     }
 
     saveTripOptions = (tripOptions) => {
-        const url = '/trpo/tripFinal';
+        const url = '/tripFinal';
         const userToken = localStorage.userToken;
         const headers = { Authorization: 'Bearer ' + userToken };
         axios.post(url, { tripId: this.state.tripOId, data: tripOptions }, { headers }
