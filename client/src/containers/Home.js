@@ -67,9 +67,6 @@ class Home extends Component {
                         <h6>Your planned trips {' '}
                             <a className="btn-link" href="/#" onClick={this.userTripsClickHandler.bind(this)}>My Trips</a>
                         </h6>
-                        <h6>Check a trip status {' '}
-                            <Link className="btn-link" to="/view">View a Trip</Link>
-                        </h6>
                     </div>
                 </div>
                 <div className="card grid-item">
@@ -83,9 +80,6 @@ class Home extends Component {
                 <div className="card grid-item">
                     <div className="card-title">My Summary</div>
                     <div className="card-body">
-                        <h6>Check your recent trip{' '}
-                            <a className="btn-link" href="/recentTrip">Recent Trip</a>
-                        </h6>
                         <h6>Check your overall trips summary {' '}
                             <a className="btn-link" href="/summary">Trips in all</a>
                         </h6>
@@ -116,11 +110,11 @@ class Home extends Component {
             <div className="grid-container-home">
                 {this.state.userTrips.map((trip, index) => (
                     <div className="grid-item-home" key={index}>
-                        <div style={{ display: 'inline-block' }} className="d-flex justify-content-between">
-                            <h6 style={{ display: 'inline-block' }}>{trip.tripId} - {trip.tripDestination}</h6>
-                            <div style={{ display: 'inline-block' }} >
-                                <button className="btn btn-light" style={{ marginRight: '5px' }} onClick={this.viewTripClickHandler.bind(this, trip.tripId)}>View</button> | {' '}
-                                <button className="btn btn-dark" style={{ marginLeft: '5px' }} onClick={this.finalizeTripClickHandler.bind(this, trip.tripId)}>Finalize</button>
+                        <div style={{ display: 'inline-block' }} className="justify-content-between">
+                            <h6 style={{ display: 'inline-block' }}>{trip.tripId} - {trip.tripDestination} - {new Date(trip.tripPlanDate).toDateString()}</h6>
+                            <div>
+                                <button className="btn btn-light" style={{ display: 'inline-block' }} onClick={this.viewTripClickHandler.bind(this, trip.tripId)}>View</button> | {' '}
+                                <button className="btn btn-dark" style={{ display: 'inline-block' }} onClick={this.finalizeTripClickHandler.bind(this, trip.tripId)}>Finalize</button>
                             </div>
                         </div>
                     </div>
@@ -137,11 +131,11 @@ class Home extends Component {
             <div className="grid-container-home">
                 {this.state.userResponses.map((trip, index) => (
                     <div className="grid-item-home" key={index}>
-                        <div style={{ display: 'inline-block' }} className="d-flex justify-content-between">
-                            <h6 style={{ display: 'inline-block' }}>{trip.tripId} - {trip.tripDestination}</h6>
-                            <div style={{ display: 'inline-block' }} >
-                                <button className="btn btn-light" style={{ marginRight: '5px' }} onClick={this.viewTripClickHandler.bind(this, trip.tripId)}>View Final Trip</button> | {' '}
-                                <button className="btn btn-dark" style={{ marginLeft: '5px' }} onClick={this.selectTripClickHandler.bind(this, trip.tripId)}>Select Options</button>
+                        <div style={{ display: 'inline-block' }} className="justify-content-between">
+                            <h6 style={{ display: 'inline-block' }}>{trip.tripId} - {trip.tripDestination} - {new Date(trip.tripResponseDate).toDateString()}</h6>
+                            <div>
+                                <button className="btn btn-light" style={{ display: 'inline-block' }} onClick={this.viewTripClickHandler.bind(this, trip.tripId)}>View Final Trip</button> | {' '}
+                                <button className="btn btn-dark" style={{ display: 'inline-block' }} onClick={this.selectTripClickHandler.bind(this, trip.tripId)}>Select Options</button>
                             </div>
                         </div>
                     </div>
