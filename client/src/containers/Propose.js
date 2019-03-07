@@ -4,11 +4,9 @@ import DayPicker, { DateUtils } from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
 import AirbnbTest from '../components/AirbnbComponent';
 import GoogleTest from '../components/GoogleComponent';
+import RestaurantTest from '../components/RestaurantComponent';
+import ShareComponent from '../components/ShareComponent';
 import { withRouter, Link } from 'react-router-dom';
-import {
-    FacebookShareButton, TwitterShareButton, WhatsappShareButton, EmailShareButton,
-    EmailIcon, WhatsappIcon, TwitterIcon, FacebookIcon
-} from 'react-share';
 
 const styles = {
     divHome: {
@@ -23,7 +21,7 @@ class Propose extends Component {
         super(props);
         const userId = localStorage.getItem('userId');
         const userName = localStorage.getItem('userName');
-        this.state = { user: { userId, userName }, activeStep: 0, destination: "", width: 20, tripSelectionUrl: "https://rkbeavs.me/trpo/select?tripId=", suggestedPlaces: ['New York, NY, USA', 'San Francisco, CA, USA', 'Florida, USA', 'Portland, OR, USA'], selectedDays: [], listAirbnbPlaces: [], listGooglePlaces: [], selectedGooglePlaces: {}, selectedAirbnbPlaces: {}, userOtherOptions: { userShare: 0, userHasCar: false, userCarFit: 0 } };
+        this.state = { user: { userId, userName }, activeStep: 0, destination: "", width: 0, tripSelectionUrl: "https://rkbeavs.me/trpo/select?tripId=", suggestedPlaces: ['New York, USA', 'San Francisco, USA', 'Florida, USA', 'Portland, USA'], selectedDays: [], listAirbnbPlaces: [], listGooglePlaces: [], selectedGooglePlaces: {}, listRestaurants: [], selectedRestaurants: {}, selectedAirbnbPlaces: {}, userOtherOptions: { userShare: 0, userHasCar: false, userCarFit: 0 } };
     }
 
     getPlaceSuggestions = (enteredPlace) => {
@@ -56,14 +54,26 @@ class Propose extends Component {
         const dest = this.state.destination;
         this.googlePlaces(dest);
         this.airbnbPlaces(dest);
+        this.restaurants(dest);
     }
 
     googlePlaces = (dest) => {
         const url = '/places?dest=' + dest;
         axios.get(url,
         ).then((res) => {
-            const googleListings = res.data.results;
+            const googleListings = res.data;
             this.setState({ listGooglePlaces: googleListings });
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
+
+    restaurants = (dest) => {
+        const url = '/restaurants?dest=' + dest;
+        axios.get(url,
+        ).then((res) => {
+            const restaurants = res.data;
+            this.setState({ listRestaurants: restaurants });
         }).catch((error) => {
             console.log(error);
         });
@@ -95,9 +105,9 @@ class Propose extends Component {
         const tripId = Math.round(10000 + Math.random() * 10000, 5);
         const userSelection = {};
         const userId = this.state.user.userId;
-        userSelection[userId] = { userName: this.state.user.userName, selectedGooglePlaces: this.state.selectedGooglePlaces, selectedAirbnbPlaces: this.state.selectedAirbnbPlaces, selectedDays: this.state.selectedDays, userOtherOptions: this.state.userOtherOptions };
+        userSelection[userId] = { userName: this.state.user.userName, selectedGooglePlaces: this.state.selectedGooglePlaces, selectedAirbnbPlaces: this.state.selectedAirbnbPlaces, selectedRestaurants: this.state.selectedRestaurants, selectedDays: this.state.selectedDays, userOtherOptions: this.state.userOtherOptions };
 
-        const trip = { tripId: tripId, tripDestination: this.state.destination, tripListGooglePlaces: this.state.listGooglePlaces, tripOwner: this.state.user, tripSelectedDays: this.state.selectedDays, tripListAirbnbPlaces: this.state.listAirbnbPlaces, tripSelectedOptions: userSelection };
+        const trip = { tripId: tripId, tripDestination: this.state.destination, tripListGooglePlaces: this.state.listGooglePlaces, tripOwner: this.state.user, tripSelectedDays: this.state.selectedDays, tripListAirbnbPlaces: this.state.listAirbnbPlaces, tripListRestaurants: this.state.listRestaurants, tripSelectedOptions: userSelection };
         const tripSelectionUrl = this.state.tripSelectionUrl + tripId;
         this.setState({ tripId, tripSelectionUrl });
         //console.log(trip);
@@ -120,7 +130,7 @@ class Propose extends Component {
 
     saveUserNewTrip = async (tripId, tripDestination) => {
         const url = '/userNewTrip';
-        const newTrip = { tripId, tripDestination };
+        const newTrip = { tripId, tripDestination, tripPlanDate: new Date() };
         const userToken = localStorage.userToken;
         const headers = { Authorization: 'Bearer ' + userToken };
         axios.post(url, { data: newTrip }, { headers }
@@ -189,60 +199,11 @@ class Propose extends Component {
 
         </div>
 
-    DisplayLinks = () =>
-        <div >
-            <div>
-                <div className="btn">
-                    <FacebookShareButton className="btn" url={this.state.tripSelectionUrl} quote={"Please select trip options for " + this.state.destination} >
-                        <FacebookIcon size={40} round={true} />
-                    </FacebookShareButton>
-                    <h6>Facebook</h6>
-                </div>
-                <div className="btn">
-                    <TwitterShareButton className="btn" hashtags={['trip poll']} title={"Please select trip options for " + this.state.destination} url={this.state.tripSelectionUrl} >
-                        <TwitterIcon size={40} round={true} />
-                    </TwitterShareButton>
-                    <h6>Twitter</h6>
-                </div>
-                <div className="btn">
-                    <EmailShareButton className="btn" url={this.state.tripSelectionUrl} subject={"Please select trip options for " + this.state.destination} body={"Hello\n\nWelcome to Trip Poll!\nPlease follow the link to select options\n" + this.state.tripSelectionUrl + "\n\nThank You\n" + this.state.user.userName}>
-                        <EmailIcon size={40} round={true} />
-                    </EmailShareButton>
-                    <h6>Email</h6>
-                </div>
-                <div className="btn">
-                    <WhatsappShareButton className="btn" url={this.state.tripSelectionUrl} title={"Please select trip options for " + this.state.destination}>
-                        <WhatsappIcon size={40} round={true} />
-                    </WhatsappShareButton>
-                    <h6>WhatsApp</h6>
-                </div>
-            </div>
-            <br /><br /><br />
-            <div style={{ display: "inline-flex" }}>
-                <input id="tripSelectionUrl" className="form-control inputPlace" defaultValue={this.state.tripSelectionUrl} readOnly />
-                <button className="btn btn-dark" onClick={this.CopyLinkSelect}> Copy Link</button>
-            </div>
-        </div>
-
-    CopyLinkSelect = () => {
-        const tripSelectionUrl = document.getElementById('tripSelectionUrl');
-        tripSelectionUrl.select();
-        document.execCommand("copy");
-        //alert("Copied the text: " + tripSelectionUrl.value);
-    }
-
-    ShareComponent = () =>
-        <div className="card">
-            <div>
-
-            </div>
-        </div>
-
     TripSuccessComponent = () =>
         <div>
             <h4>Trip Successful! Share with friends...</h4>
             <br /><br />
-            <this.DisplayLinks />
+            <ShareComponent destination={this.state.destination} tripSelectionUrl={this.state.tripSelectionUrl} user={this.state.user} />
         </div>
 
     handleGoogleClick = (place, e) => {
@@ -264,6 +225,27 @@ class Propose extends Component {
             };
         }
         this.setState({ selectedGooglePlaces });
+    }
+
+    handleRestaurantClick = (restaurant, e) => {
+        e.preventDefault();
+        const { selectedRestaurants } = this.state;
+        if (selectedRestaurants[restaurant.id] !== 1) {
+            selectedRestaurants[restaurant.id] = 1;
+            if (e.target.parentElement.id === 'restaurantGrid') {
+                e.target.parentElement.className = 'card grid-item-selected'
+            } else if (e.target.id === 'restaurantGrid') {
+                e.target.className = 'card grid-item-selected'
+            };
+        } else {
+            delete selectedRestaurants[restaurant.id];
+            if (e.target.parentElement.id === 'restaurantGrid') {
+                e.target.parentElement.className = 'card grid-item'
+            } else if (e.target.id === 'restaurantGrid') {
+                e.target.className = 'card grid-item'
+            };
+        }
+        this.setState({ selectedRestaurants });
     }
 
     handleAirbnbClick = (lis, e) => {
@@ -293,7 +275,8 @@ class Propose extends Component {
             case 1: return <this.DateComponent />
             case 2: return <GoogleTest destination={this.state.destination} listGooglePlaces={this.state.listGooglePlaces} selectedGooglePlaces={this.state.selectedGooglePlaces} handleGoogleClick={this.handleGoogleClick} />
             case 3: return <AirbnbTest destination={this.state.destination} listAirbnbPlaces={this.state.listAirbnbPlaces} selectedAirbnbPlaces={this.state.selectedAirbnbPlaces} handleAirbnbClick={this.handleAirbnbClick} />
-            case 4: return <this.ShareAndCarComponent />
+            case 4: return <RestaurantTest destination={this.state.destination} listRestaurants={this.state.listRestaurants} selectedRestaurants={this.state.selectedRestaurants} handleRestaurantClick={this.handleRestaurantClick} />
+            case 5: return <this.ShareAndCarComponent />
             default: return <h4>Please <Link to="/login" >Login</Link></h4>
         }
     }
@@ -302,11 +285,11 @@ class Propose extends Component {
         return (
             <div className="container">
                 <br />
-                {this.state.activeStep <= 4 ? <div className="progress">
+                {this.state.activeStep <= 5 ? <div className="progress">
                     <div ref="progressTrip" className="progress-bar progress-bar-striped bg-dark" role="progressbar" style={{ width: this.state.width + '%' }} aria-valuemin="0" aria-valuemax="100">{this.state.width}%</div>
                 </div> : <div></div>}
                 <div className="jumbotron container" style={styles.divHome}>
-                    {this.state.activeStep !== 5 ?
+                    {this.state.activeStep !== 6 ?
                         <div>
                             {this.switchComponent(this.state.activeStep)}
                             <br /><br />
@@ -317,7 +300,7 @@ class Propose extends Component {
                                     this.setState({ activeStep: this.state.activeStep - 1, width: this.state.width - 20 })
                                 }} disabled={this.state.activeStep === 0}>Back</button>
 
-                                {this.state.activeStep !== 4 ?
+                                {this.state.activeStep !== 5 ?
                                     <button className="btn btn-dark" onClick={() => {
                                         if (this.state.destination !== "" && this.state.activeStep === 0) {
                                             this.generateGoogleAndAirbnbPlaces();
