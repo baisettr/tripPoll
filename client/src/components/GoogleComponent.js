@@ -17,6 +17,7 @@ const GooglePlacesComponent = (props) => {
             <div className="grid-container">
                 {listGooglePlaces.map((place, index) => (
                     <div id="googleGrid" className={selectedGooglePlaces[place.id] === 1 ? "card grid-item-selected" : "card grid-item"} key={index} onClick={props.handleGoogleClick.bind(this, place)}>
+                        <img className="card-img-top" src={place.photoUrl} alt="" height="150" />
                         <h6>{place.name} {' '}
                             <a style={{ fontSize: '13px' }} className="btn-link" href='/#' onClick={googlePlaceSearchHandler.bind(this, place.name)}>More...</a>
                         </h6>
