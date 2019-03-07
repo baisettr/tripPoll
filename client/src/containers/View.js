@@ -3,10 +3,7 @@ import axios from 'axios';
 import DayPicker from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
 import { withRouter, Link } from 'react-router-dom';
-import {
-    FacebookShareButton, TwitterShareButton, WhatsappShareButton, EmailShareButton,
-    EmailIcon, WhatsappIcon, TwitterIcon, FacebookIcon
-} from 'react-share';
+import ShareComponent from '../components/ShareComponent';
 
 const styles = {
     divHome: {
@@ -20,7 +17,7 @@ class View extends Component {
     constructor(props) {
         super(props);
         const tripId = props.location.search.split('=')[1];
-        this.state = { error: "", user: {}, tripId: tripId, finalTrip: {}, activeStep: 0, destination: "", tripSelectionUrl: "https://rkbeavs.me/trpo/select?tripId=", selectedAirbnbPlaces: [], selectedGooglePlaces: [], listAirbnbPlaces: [], listGooglePlaces: [] };
+        this.state = { error: "", user: {}, tripId: tripId, finalTrip: {}, activeStep: 0, destination: "", tripSelectionUrl: "https://rkbeavs.me/trpo/select?tripId=", selectedAirbnbPlaces: [], selectedGooglePlaces: [], listAirbnbPlaces: [], listGooglePlaces: [], listRestaurants: [], selectedRestaurants: {} };
     }
 
     componentDidMount() {
@@ -46,24 +43,30 @@ class View extends Component {
             const trip = res.data;
             console.log(trip);
             if (trip.finalTrip) {
-                const { tripOwner, finalTrip, tripDestination, tripListGooglePlaces, tripListAirbnbPlaces } = trip;
+                const { tripOwner, finalTrip, tripDestination, tripListGooglePlaces, tripListAirbnbPlaces, tripListRestaurants } = trip;
                 let selectedGooglePlaces = [];
-                for (const i in tripListGooglePlaces) {
+                for (let i in tripListGooglePlaces) {
                     const place = tripListGooglePlaces[i];
                     if (finalTrip.selectedGooglePlaces[place.id] === 1) {
                         selectedGooglePlaces.push(place);
                     }
                 };
                 let selectedAirbnbPlaces = [];
-                for (const i in tripListAirbnbPlaces) {
+                for (let i in tripListAirbnbPlaces) {
                     const room = tripListAirbnbPlaces[i];
                     if (finalTrip.selectedAirbnbPlaces[room.id] === 1) {
                         selectedAirbnbPlaces.push(room);
                     }
                 };
-
-                this.setState({ activeStep: 1, user: tripOwner, destination: tripDestination, listGooglePlaces: tripListGooglePlaces, listAirbnbPlaces: tripListAirbnbPlaces, selectedAirbnbPlaces, selectedGooglePlaces, finalTrip });
-            } else { this.setState({ activeStep: 2 }); }
+                let selectedRestaurants = [];
+                for (let i in tripListRestaurants) {
+                    const restaurant = tripListRestaurants[i];
+                    if (finalTrip.selectedRestaurants[restaurant.id] === 1) {
+                        selectedRestaurants.push(restaurant);
+                    }
+                };
+                this.setState({ activeStep: 1, user: tripOwner, destination: tripDestination, listGooglePlaces: tripListGooglePlaces, listAirbnbPlaces: tripListAirbnbPlaces, listRestaurants: tripListRestaurants, selectedAirbnbPlaces, selectedGooglePlaces, selectedRestaurants, finalTrip });
+            } else { this.setState({ activeStep: 2, user: trip.tripOwner, destination: trip.tripDestination }); }
         }).catch((error) => {
             const message = error.response.data.message;
             this.setState({ error: message, activeStep: 0 })
@@ -105,6 +108,7 @@ class View extends Component {
             <div className="grid-container">
                 {this.state.selectedGooglePlaces.map((place, index) => (
                     <div id="googleGrid" className="card grid-item" key={index} >
+                        <img className="card-img-top" src={place.photoUrl} alt="" height="150" />
                         <h6>{place.name} {' '}
                             <a style={{ fontSize: '13px' }} className="btn-link" href='/#' onClick={this.googlePlaceSearchHandler.bind(this, place.name)}>More...</a>
                         </h6>
@@ -137,6 +141,30 @@ class View extends Component {
             </div>
         </div>
 
+    restaurantSearchHandler = (restaurant, e) => {
+        e.preventDefault();
+        const url = 'https://google.com/search?q=' + restaurant + ', ' + this.state.destination;
+        window.open(url, '_blank', 'height=500,width=1400');
+    }
+
+    RestaurantComponent = () =>
+        <div>
+            <br />
+            <h6>Top Restaurants!</h6>
+            <br />
+            <div className="grid-container">
+                {this.state.selectedRestaurants.map((restaurant, index) => (
+                    <div id="restaurantGrid" className="card grid-item" key={index} >
+                        <img className="card-img-top" src={restaurant.photoUrl} alt="" height="150" />
+                        <h6>{restaurant.name} {' '}
+                            <a style={{ fontSize: '13px' }} className="btn-link" href='/#' onClick={this.restaurantSearchHandler.bind(this, restaurant.name)}>More...</a>
+                        </h6>
+                        <h6 style={{ display: "inherit", margin: "auto" }}><span style={{ color: "#e7711b", paddingRight: "5px" }}>{restaurant.rating} </span> {[1, 2, 3, 4, 5].map((e, index) => { if (Math.round(restaurant.rating) >= e) { return <span style={{ color: "#e7711b" }} key={index}>★</span> } else { return <span style={{ color: "black" }} key={index}>★</span> } })}<span style={{ color: "grey", paddingLeft: "5px" }}>({restaurant.user_ratings_total})</span></h6>
+
+                    </div>
+                ))}
+            </div>
+        </div>
 
     ShareAndCarComponent = () =>
         <div>
@@ -163,57 +191,21 @@ class View extends Component {
                 {this.state.finalTrip.users.map((u, index) => <h6 key={index}>{u}</h6>)}
             </div>
         </div>
+
     DateComponent = () => <div >
         <h6>Trip Dates</h6>
-        <DayPicker month={new Date(this.state.finalTrip.selectedDays[0])} selectedDays={this.state.finalTrip.selectedDays.map((day) => new Date(day))} />
+        <DayPicker selectedDays={this.state.finalTrip.selectedDays.map((day) => new Date(day))} />
     </div>
-
-    DisplayLinks = () =>
-        <div >
-            <div>
-                <div className="btn">
-                    <FacebookShareButton className="btn" url={this.state.tripSelectionUrl} quote={"Please select trip options for " + this.state.destination} >
-                        <FacebookIcon size={40} round={true} />
-                    </FacebookShareButton>
-                    <h6>Facebook</h6>
-                </div>
-                <div className="btn">
-                    <TwitterShareButton className="btn" hashtags={['trip poll']} title={"Please select trip options for " + this.state.destination} url={this.state.tripSelectionUrl} >
-                        <TwitterIcon size={40} round={true} />
-                    </TwitterShareButton>
-                    <h6>Twitter</h6>
-                </div>
-                <div className="btn">
-                    <EmailShareButton className="btn" url={this.state.tripSelectionUrl} subject={"Please select trip options for " + this.state.destination} body={"Hello\n\nWelcome to Trip Poll!\nPlease follow the link to select options\n" + this.state.tripSelectionUrl + "\n\nThank You\n" + this.state.user.userName}>
-                        <EmailIcon size={40} round={true} />
-                    </EmailShareButton>
-                    <h6>Email</h6>
-                </div>
-                <div className="btn">
-                    <WhatsappShareButton className="btn" url={this.state.tripSelectionUrl} title={"Please select trip options for " + this.state.destination}>
-                        <WhatsappIcon size={40} round={true} />
-                    </WhatsappShareButton>
-                    <h6>WhatsApp</h6>
-                </div>
-            </div>
-            <br /><br /><br />
-            <div style={{ display: "inline-flex" }}>
-                <input id="tripSelectionUrl" className="form-control inputPlace" defaultValue={this.state.tripSelectionUrl} readOnly />
-                <button className="btn btn-dark" onClick={this.CopyLinkSelect}> Copy Link</button>
-            </div>
-        </div>
-
-    CopyLinkSelect = () => {
-        const tripSelectionUrl = document.getElementById('tripSelectionUrl');
-        tripSelectionUrl.select();
-        document.execCommand("copy");
-    }
 
     DisplayLinksComponent = () =>
         <div>
             <h4>Trip has not yet finalized!</h4>
             <br /><br />
-            <this.DisplayLinks />
+            <ShareComponent destination={this.state.destination} tripSelectionUrl={this.state.tripSelectionUrl} user={this.state.user} />
+            <br /><br /><br />
+            <div >
+                <Link to={this.state.tripSelectionUrl}><button className="btn btn-light" >Proceed to Select Options</button></Link>
+            </div>
         </div>
 
     DisplayTripDetails = () =>
@@ -224,7 +216,10 @@ class View extends Component {
                 <this.ShareAndCarComponent />
             </div>
             <this.GooglePlacesComponent />
+            <br />
             <this.AirbnbPlacesComponent />
+            <br />
+            <this.RestaurantComponent />
         </div>
 
     SpinComponent = () => <div className='Loader'>Loading...</div>
