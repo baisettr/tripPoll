@@ -1,4 +1,6 @@
 const axios = require('axios');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 const keys = require('../config/keys');
 const jwt = require('jsonwebtoken');
 
@@ -6,18 +8,26 @@ function userSignUp(userDetails) {
     return new Promise((resolve, reject) => {
 
         const url = 'https://api.mlab.com/api/1/databases/tripo/collections/users?apiKey=' + keys.mlabAPIKey;
-        axios.post(url, userDetails)
-            .then((res) => {
-                //console.log(res.data);
-                if (res.data) {
-                    console.log("success sign up");
-                    const user = { userId: res.data.userId, userOId: res.data._id.$oid };
-                    const token = jwt.sign(user, keys.jwtKey, { algorithm: 'HS256', expiresIn: 60 * 60 });
-                    const userClient = { token, userId: user.userId, userName: res.data.userName };
-                    resolve(userClient);
-                } else {
-                    reject("Invalid registration details!");
-                }
+        const userSaveDetails = userDetails
+        bcrypt.hash(userDetails.userPassword, saltRounds)
+            .then((hash) => {
+                userSaveDetails.userPassword = hash;
+                axios.post(url, userSaveDetails)
+                    .then((res) => {
+                        //console.log(res.data);
+                        if (res.data) {
+                            console.log("success sign up");
+                            const user = { userId: res.data.userId, userOId: res.data._id.$oid };
+                            const token = jwt.sign(user, keys.jwtKey, { algorithm: 'HS256', expiresIn: 60 * 60 });
+                            const userClient = { token, userId: user.userId, userName: res.data.userName };
+                            resolve(userClient);
+                        } else {
+                            reject("Invalid registration details!");
+                        }
+                    })
+                    .catch((err) => {
+                        reject("Internal error. Please try again!");
+                    });
             })
             .catch((err) => {
                 reject("Internal error. Please try again!");
@@ -33,23 +43,23 @@ function userSignIn(userDetails) {
             .then((res) => {
                 if (res.data.length) {
                     const userFullDetails = res.data[0];
-                    if (userFullDetails.userPassword === userDetails.userPassword) {
-                        console.log("success login");
-                        const user = { userId: userFullDetails.userId, userOId: userFullDetails._id.$oid };
-                        const token = jwt.sign(user, keys.jwtKey, { algorithm: 'HS256', expiresIn: 60 * 60 });
-                        //console.log(token);
-                        const userClient = { token, userId: user.userId, userName: userFullDetails.userName };
-                        resolve(userClient);
-                    } else {
-                        reject("Incorrect password. Please try again!");
-                    };
+                    bcrypt.compare(userDetails.userPassword, userFullDetails.userPassword)
+                        .then(function (res) {
+                            if (res) {
+                                console.log("success login");
+                                const user = { userId: userFullDetails.userId, userOId: userFullDetails._id.$oid };
+                                const token = jwt.sign(user, keys.jwtKey, { algorithm: 'HS256', expiresIn: 60 * 60 });
+                                const userClient = { token, userId: user.userId, userName: userFullDetails.userName };
+                                resolve(userClient);
+                            } else {
+                                reject("Incorrect password. Please try again!");
+                            };
+                        }).catch((err) => { reject("Internal error. Please try again!"); });
                 } else {
                     reject("Please check email and try again!");
                 };
             })
-            .catch((err) => {
-                reject("Internal error. Please try again!");
-            });
+            .catch((err) => { reject("Internal error. Please try again!"); });
     });
 }
 
