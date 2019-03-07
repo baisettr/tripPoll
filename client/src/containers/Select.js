@@ -46,6 +46,7 @@ class Select extends Component {
             const { _id, tripOwner, tripDestination, tripSelectedDays, tripListGooglePlaces, tripListAirbnbPlaces, tripListRestaurants, tripSelectedOptions } = trip;
             const userId = this.state.user.userId;
             const userSelection = tripSelectedOptions[userId] ? tripSelectedOptions[userId] : tripSelectedOptions[tripOwner.userId];
+            if (!tripSelectedOptions[userId]) { userSelection.userOtherOptions = { userShare: 0, userHasCar: false, userCarFit: 0 } }
             const { selectedGooglePlaces, selectedRestaurants, selectedAirbnbPlaces, userOtherOptions, selectedDays } = userSelection;
             this.setState({ activeStep: 1, tripOId: _id.$oid, tripOwner, destination: tripDestination, tripSelectedDays, selectedDays, selectedGooglePlaces, selectedAirbnbPlaces, userOtherOptions, listGooglePlaces: tripListGooglePlaces, listAirbnbPlaces: tripListAirbnbPlaces, selectedRestaurants, listRestaurants: tripListRestaurants, tripSelectedOptions, userSelection });
         }).catch((error) => {
@@ -170,10 +171,10 @@ class Select extends Component {
         const headers = { Authorization: 'Bearer ' + userToken };
         axios.post(url, { tripId: this.state.tripOId, data: tripOptions }, { headers }
         ).then((res) => {
-            console.log("Options Saved");
-            console.log(res.data);
+            //console.log("Options Saved");
+            //console.log(res.data);
         }).catch((error) => {
-            console.log(error);
+            //console.log(error);
         });
     }
 
@@ -184,10 +185,10 @@ class Select extends Component {
         const headers = { Authorization: 'Bearer ' + userToken };
         axios.post(url, { data: newTrip }, { headers }
         ).then((res) => {
-            console.log("User Response Saved");
-            console.log(res.data);
+            //console.log("User Response Saved");
+            //console.log(res.data);
         }).catch((error) => {
-            console.log(error);
+            //console.log(error);
         });
     }
 

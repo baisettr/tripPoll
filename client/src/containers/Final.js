@@ -40,7 +40,7 @@ class Final extends Component {
 
     finalize = async (tripSel, tripListGooglePlaces, tripListAirbnbPlaces, tripListRestaurants) => {
         let finalTrip = { users: [], selectedGooglePlaces: {}, selectedAirbnbPlaces: {}, selectedRestaurants: {}, selectedDays: {}, userShare: 0, userHasCar: 0, userCarFit: 0 }
-        const f_sort = (sel) => { let y = Object.keys(sel); return y.sort((a, b) => sel[b] - sel[a]) };
+        const f_sort = (sel) => { let y = Object.keys(sel); let z = y.sort((a, b) => sel[b] - sel[a]); let x = {}; z.forEach((e) => { x[e] = 1 }); return x };
         const f_map = (selPlace, sel) => { let selList = sel.length ? sel : Object.keys(sel); selList.map((s) => { if (!selPlace[s]) { selPlace[s] = 0; }; selPlace[s] += 1; }) };
         let userIds = Object.keys(tripSel);
         userIds.map((s) => {
@@ -58,35 +58,35 @@ class Final extends Component {
         let topSelectedRestaurants = f_sort(finalTrip.selectedRestaurants);
         let topSelectedDays = f_sort(finalTrip.selectedDays);
         let userOtherOptions = { userShare: finalTrip.userShare, userHasCar: finalTrip.userHasCar, userCarFit: finalTrip.userCarFit }
-        console.log(finalTrip);
-        let selectedGooglePlaces = {};
+        //console.log(finalTrip);
+        let selectedGooglePlaces = topSelectedGooglePlaces;
         let listGooglePlaces = [];
-        for (const i in topSelectedGooglePlaces) {
-            const place = tripListGooglePlaces[i];
-            selectedGooglePlaces[place.id] = 1;
-            listGooglePlaces.push(place);
-        };
+        tripListGooglePlaces.forEach((i) => {
+            if (topSelectedGooglePlaces[i.id]) {
+                listGooglePlaces.push(i);
+            }
+        });
         let listAirbnbPlaces = [];
-        let selectedAirbnbPlaces = {};
-        for (const i in topSelectedAirbnbPlaces) {
-            const room = tripListAirbnbPlaces[i];
-            selectedAirbnbPlaces[room.id] = 1;
-            listAirbnbPlaces.push(room);
-        };
+        let selectedAirbnbPlaces = topSelectedAirbnbPlaces;
+        tripListAirbnbPlaces.forEach((i) => {
+            if (topSelectedAirbnbPlaces[i.id]) {
+                listAirbnbPlaces.push(i);
+            }
+        });
         let listRestaurants = [];
-        let selectedRestaurants = {};
-        for (const i in topSelectedRestaurants) {
-            const room = tripListRestaurants[i];
-            selectedRestaurants[room.id] = 1;
-            listRestaurants.push(room);
-        };
-        this.setState({ finalTrip, finalSelectedDays: topSelectedDays, selectedGooglePlaces, selectedAirbnbPlaces, selectedRestaurants, listGooglePlaces, listAirbnbPlaces, listRestaurants, userOtherOptions });
+        let selectedRestaurants = topSelectedRestaurants;
+        tripListRestaurants.forEach((i) => {
+            if (topSelectedRestaurants[i.id]) {
+                listRestaurants.push(i);
+            }
+        });
+        this.setState({ finalTrip, finalSelectedDays: Object.keys(topSelectedDays), selectedGooglePlaces, selectedAirbnbPlaces, selectedRestaurants, listGooglePlaces, listAirbnbPlaces, listRestaurants, userOtherOptions });
     }
 
     getTripDetails = async (tripId) => {
         const userToken = localStorage.userToken;
         const headers = { Authorization: 'Bearer ' + userToken };
-        const url = '/trip?tripId=' + tripId;
+        const url = '/trpo/trip?tripId=' + tripId;
         axios.get(url, { headers }
         ).then((res) => {
             const trip = res.data;
@@ -274,15 +274,15 @@ class Final extends Component {
     }
 
     saveTripOptions = (tripOptions) => {
-        const url = '/tripFinal';
+        const url = '/trpo/tripFinal';
         const userToken = localStorage.userToken;
         const headers = { Authorization: 'Bearer ' + userToken };
         axios.post(url, { tripId: this.state.tripOId, data: tripOptions }, { headers }
         ).then((res) => {
-            console.log("Options Saved");
-            console.log(res.data);
+            //console.log("Options Saved");
+            //console.log(res.data);
         }).catch((error) => {
-            console.log(error);
+            //console.log(error);
         });
     }
 

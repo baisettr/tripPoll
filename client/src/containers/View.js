@@ -41,7 +41,7 @@ class View extends Component {
         axios.get(url, { headers }
         ).then((res) => {
             const trip = res.data;
-            console.log(trip);
+            //console.log(trip);
             if (trip.finalTrip) {
                 const { tripOwner, finalTrip, tripDestination, tripListGooglePlaces, tripListAirbnbPlaces, tripListRestaurants } = trip;
                 let selectedGooglePlaces = [];
@@ -204,7 +204,7 @@ class View extends Component {
             <ShareComponent destination={this.state.destination} tripSelectionUrl={this.state.tripSelectionUrl} user={this.state.user} />
             <br /><br /><br />
             <div >
-                <Link to={this.state.tripSelectionUrl}><button className="btn btn-light" >Proceed to Select Options</button></Link>
+                <Link to={"/select?tripId=" + this.state.tripId}><button className="btn btn-dark" >Proceed to Select Options</button></Link>
             </div>
         </div>
 
