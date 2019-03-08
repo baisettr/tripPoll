@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { Link, withRouter } from 'react-router-dom';
+import ChartTest from '../components/ChartComponent';
 
 const styles = {
     divHome: {
@@ -13,7 +14,7 @@ const styles = {
 class Home extends Component {
     constructor(props) {
         super(props);
-        this.state = { error: "", actionStep: 0, userTrips: [], userResponses: [] }
+        this.state = { error: "", actionStep: 0, userTrips: [], userResponses: [], userChartData: [], userPlaceData: [], userDateData: [] }
     }
 
     userTripsClickHandler = (e) => {
@@ -42,6 +43,39 @@ class Home extends Component {
         ).then((res) => {
             //console.log(res.data.data)
             this.setState({ actionStep: 2, userResponses: res.data.data });
+        }).catch((error) => {
+            const message = error.response.data.message;
+            this.setState({ error: message, actionStep: 4 });
+        });
+
+    }
+
+    userSummaryClickHandler = (e) => {
+        e.preventDefault();
+        this.setState({ actionStep: 3 });
+        const url = '/userSummary';
+        const userToken = localStorage.userToken;
+        const headers = { Authorization: 'Bearer ' + userToken };
+        axios.get(url, { headers }
+        ).then((res) => {
+            const userSummary = res.data.data;
+            const c1 = userSummary.userTrips.length;
+            const c2 = userSummary.userResponses.length;
+            const userChartData = [['Trips', 'Count'], ['MyTrips', c1], ['MyResponses', c2]];
+            let overallPlaces = [...userSummary.userTrips, ...userSummary.userResponses]
+            let userPlaces = overallPlaces.reduce((allPlaces, place) => { allPlaces[place.tripDestination] = (allPlaces[place.tripDestination] || 0) + 1; return allPlaces }, {})
+            let userPlaceData = [["Place", "Count"]]
+            for (let i in userPlaces) {
+                let row = [i, userPlaces[i]]
+                userPlaceData.push(row);
+            }
+            let userDates = overallPlaces.reduce((allPlaces, place) => { let placeDate = new Date(place.tripPlanDate || place.tripResponseDate).toLocaleString("en", { month: "short", year: "numeric" }); allPlaces[placeDate] = (allPlaces[placeDate] || 0) + 1; return allPlaces }, {})
+            let userDateData = [["Sate", "Count"]]
+            for (let i in userDates) {
+                let row = [i, userDates[i]]
+                userDateData.push(row);
+            }
+            this.setState({ actionStep: 5, userChartData, userPlaceData, userDateData });
         }).catch((error) => {
             const message = error.response.data.message;
             this.setState({ error: message, actionStep: 4 });
@@ -81,7 +115,7 @@ class Home extends Component {
                     <div className="card-title">My Summary</div>
                     <div className="card-body">
                         <h6>Check your overall trips summary {' '}
-                            <a className="btn-link" href="/summary">Trips in all</a>
+                            <a className="btn-link" href="/#" onClick={this.userSummaryClickHandler.bind(this)}>Trips in all</a>
                         </h6>
                     </div>
                 </div>
@@ -145,6 +179,12 @@ class Home extends Component {
             <h6>Proceed to <a href="/#" onClick={this.HomeClickHandler.bind(this)}>Home</a></h6>
         </div>
 
+    userSummaryComponent = () =>
+        <div className="jumbotron container" style={styles.divHome}>
+            <ChartTest data={this.state.userChartData} data1={this.state.userPlaceData} data2={this.state.userDateData} />
+
+        </div>
+
     SpinComponent = () => <div className='Loader divHome'>Loading...</div>
 
     ErrorMessageComponent = () => <div><h6 style={{ color: 'red', textAlign: 'center' }}>{this.state.error}</h6></div>
@@ -156,6 +196,7 @@ class Home extends Component {
             case 2: return <this.userResponsesComponent />
             case 3: return <this.SpinComponent />
             case 4: return <this.ErrorMessageComponent />
+            case 5: return <this.userSummaryComponent />
             default: return <h4>Please <Link to="/login">Login</Link> Have a Nice Day!</h4>
         }
     }
