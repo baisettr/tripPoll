@@ -24,6 +24,8 @@ class Select extends Component {
     }
 
     componentDidMount() {
+        let elmnt = document.getElementById("root");
+        setTimeout(() => elmnt.scrollIntoView(), 0);
         const query = new URLSearchParams(this.props.location.search);
         const queryParams = {};
         for (let param of query.entries()) {
@@ -43,10 +45,18 @@ class Select extends Component {
         axios.get(url, { headers }
         ).then((res) => {
             const trip = res.data;
-            const { _id, tripOwner, tripDestination, tripSelectedDays, tripListGooglePlaces, tripListAirbnbPlaces, tripListRestaurants, tripSelectedOptions } = trip;
+            const { _id, tripOwner, tripDestination, tripSelectedDays, tripListGooglePlaces, tripListAirbnbPlaces, tripListRestaurants } = trip;
+            const tripSelectedOptions = trip.tripSelectedOptions;
             const userId = this.state.user.userId;
-            const userSelection = tripSelectedOptions[userId] ? tripSelectedOptions[userId] : tripSelectedOptions[tripOwner.userId];
-            if (!tripSelectedOptions[userId]) { userSelection.userOtherOptions = { userShare: 0, userHasCar: false, userCarFit: 0 } }
+            let userSelection = {};
+
+            if (tripSelectedOptions[userId]) {
+                userSelection = tripSelectedOptions[userId]
+            } else {
+                userSelection = JSON.parse(JSON.stringify(tripSelectedOptions[tripOwner.userId]));
+            }
+            //tripSelectedOptions[userId] ? tripSelectedOptions[userId] : tripSelectedOptions[tripOwner.userId];
+            if (!tripSelectedOptions[userId]) { userSelection.userName = this.state.user.userName; userSelection.selectedDays = []; userSelection.userOtherOptions = { userShare: 0, userHasCar: false, userCarFit: 0 } }
             const { selectedGooglePlaces, selectedRestaurants, selectedAirbnbPlaces, userOtherOptions, selectedDays } = userSelection;
             this.setState({ activeStep: 1, tripOId: _id.$oid, tripOwner, destination: tripDestination, tripSelectedDays, selectedDays, selectedGooglePlaces, selectedAirbnbPlaces, userOtherOptions, listGooglePlaces: tripListGooglePlaces, listAirbnbPlaces: tripListAirbnbPlaces, selectedRestaurants, listRestaurants: tripListRestaurants, tripSelectedOptions, userSelection });
         }).catch((error) => {
@@ -57,7 +67,7 @@ class Select extends Component {
 
     SelectHomeComponent = () =>
         <div>
-            <h4>Enter the trip id associated with the trip</h4>
+            <h4>Enter the trip id associated with the trip.</h4>
             <br />
             <h6 style={{ color: 'red' }}>{this.state.error}</h6>
             <form onSubmit={this.getTripDetailsFromUserInput}>
@@ -77,6 +87,7 @@ class Select extends Component {
     TripHomeComponent = () =>
         <div>
             <h4>Trip Details</h4>
+            <h6>Proposed by : {this.state.tripOwner.userName}</h6>
             <br />
             <div>
                 <label>Destination : {this.state.destination}</label>
@@ -109,8 +120,9 @@ class Select extends Component {
         };
         return (
             <div>
-                <h4>Choose the Trip Dates</h4>
-                <DayPicker modifiers={modifiers} month={new Date(this.state.tripSelectedDays[0])}
+                <h4>Select multiple trip dates when you are able to make a trip.</h4>
+                <h6>Outlined dates suggested by : {this.state.tripOwner.userName}</h6>
+                <DayPicker modifiers={modifiers} month={new Date(this.state.tripSelectedDays[0] || new Date().toDateString())}
                     modifiersStyles={modifiersStyles} selectedDays={this.state.selectedDays.map((day) => new Date(day))}
                     disabledDays={{ before: new Date() }} onDayClick={this.handleDayClick.bind(this)}
                 />
@@ -122,7 +134,7 @@ class Select extends Component {
         <div>
             <h4>Trip Share and Car Details</h4>
             <br />
-            <label style={{ paddingRight: '10px' }}>Enter your share for the Trip (in $)</label>
+            <label style={{ paddingRight: '10px' }}>Enter the share you are willing to contribute for the trip (in $)</label>
             <input className="inputShare inputPlace" placeholder="Enter a Share Amount in $" required={true} type="number" defaultValue={this.state.userOtherOptions.userShare}
                 onChange={(e) => {
                     const { userOtherOptions } = this.state;
@@ -131,7 +143,7 @@ class Select extends Component {
                 }} />
             <br />
             <div >
-                <label style={{ paddingRight: '15px' }}>Do you own a Car for the Trip?</label>
+                <label style={{ paddingRight: '15px' }}>Do you own a car for the trip?</label>
                 <label>
                     <input type="checkbox" checked={this.state.userOtherOptions.userHasCar} onChange={(e) => {
                         const { userOtherOptions } = this.state;
@@ -156,11 +168,9 @@ class Select extends Component {
 
     generateTripOptions = () => {
         const userId = this.state.user.userId;
-        const { tripSelectedOptions } = this.state;
+        const tripSelectedOptions = this.state.tripSelectedOptions;
         const newUserSelection = { userName: this.state.user.userName, selectedGooglePlaces: this.state.selectedGooglePlaces, selectedAirbnbPlaces: this.state.selectedAirbnbPlaces, selectedRestaurants: this.state.selectedRestaurants, selectedDays: this.state.selectedDays, userOtherOptions: this.state.userOtherOptions };
-
         tripSelectedOptions[userId] = newUserSelection;
-
         this.saveTripOptions(tripSelectedOptions);
         this.saveUserNewResponse(this.state.tripId, this.state.destination);
     }
@@ -269,9 +279,9 @@ class Select extends Component {
             case 0: return <this.SelectHomeComponent />
             case 1: return <this.TripHomeComponent />
             case 2: return <this.DateComponent />
-            case 3: return <GoogleTest destination={this.state.destination} listGooglePlaces={this.state.listGooglePlaces} selectedGooglePlaces={this.state.selectedGooglePlaces} handleGoogleClick={this.handleGoogleClick} />
-            case 4: return <AirbnbTest destination={this.state.destination} listAirbnbPlaces={this.state.listAirbnbPlaces} selectedAirbnbPlaces={this.state.selectedAirbnbPlaces} handleAirbnbClick={this.handleAirbnbClick} />
-            case 5: return <RestaurantTest destination={this.state.destination} listRestaurants={this.state.listRestaurants} selectedRestaurants={this.state.selectedRestaurants} handleRestaurantClick={this.handleRestaurantClick} />
+            case 3: return <GoogleTest destination={this.state.destination} showSelection={true} tripOwnerUserName={this.state.tripOwner.userName} listGooglePlaces={this.state.listGooglePlaces} selectedGooglePlaces={this.state.selectedGooglePlaces} handleGoogleClick={this.handleGoogleClick} />
+            case 4: return <AirbnbTest destination={this.state.destination} showSelection={true} tripOwnerUserName={this.state.tripOwner.userName} listAirbnbPlaces={this.state.listAirbnbPlaces} selectedAirbnbPlaces={this.state.selectedAirbnbPlaces} handleAirbnbClick={this.handleAirbnbClick} />
+            case 5: return <RestaurantTest destination={this.state.destination} showSelection={true} tripOwnerUserName={this.state.tripOwner.userName} listRestaurants={this.state.listRestaurants} selectedRestaurants={this.state.selectedRestaurants} handleRestaurantClick={this.handleRestaurantClick} />
             case 6: return <this.ShareAndCarComponent />
             case 7: return <this.TripSuccessComponent />
             case 8: return <this.SpinComponent />
@@ -286,7 +296,7 @@ class Select extends Component {
                 {this.state.activeStep >= 1 && this.state.activeStep <= 6 ? <div className="progress">
                     <div ref="progressTrip" className="progress-bar progress-bar-striped bg-dark" role="progressbar" style={{ width: this.state.width + '%' }} aria-valuemin="0" aria-valuemax="100">{this.state.width}%</div>
                 </div> : <div></div>}
-                <div className="jumbotron container" style={styles.divHome}>
+                <div className="jumbotron container" id="switchHome" style={styles.divHome}>
                     {this.state.activeStep >= 0 ?
                         <div>
                             {this.switchComponent(this.state.activeStep)}
@@ -296,13 +306,18 @@ class Select extends Component {
 
                                     <button className="btn btn-light" onClick={() => {
                                         this.refs.progressTrip.style.width = this.state.width - 20 + '%';
-                                        this.setState({ activeStep: this.state.activeStep - 1, width: this.state.width - 20 })
+                                        this.setState({ activeStep: this.state.activeStep - 1, width: this.state.width - 20 });
+                                        let elmnt = document.getElementById("root");
+                                        setTimeout(() => elmnt.scrollIntoView(), 0);
                                     }} disabled={this.state.activeStep === 0}>Back</button>
 
                                     {this.state.activeStep !== 6 ?
                                         <button className="btn btn-dark" onClick={() => {
                                             this.refs.progressTrip.style.width = this.state.width + 20 + '%';
-                                            this.setState({ activeStep: this.state.activeStep + 1, width: this.state.width + 20 })
+                                            this.setState({ activeStep: this.state.activeStep + 1, width: this.state.width + 20 });
+                                            let elmnt = document.getElementById("root");
+                                            setTimeout(() => elmnt.scrollIntoView(), 0);
+
                                         }}>Next</button>
                                         :
                                         <button className="btn btn-dark" onClick={() => {

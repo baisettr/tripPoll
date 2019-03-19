@@ -21,6 +21,8 @@ class View extends Component {
     }
 
     componentDidMount() {
+        let elmnt = document.getElementById("root");
+        setTimeout(() => elmnt.scrollIntoView(), 0);
         const query = new URLSearchParams(this.props.location.search);
         const queryParams = {};
         for (let param of query.entries()) {
@@ -84,7 +86,7 @@ class View extends Component {
 
     ViewHomeComponent = () =>
         <div>
-            <h4>Enter the trip id associated with the trip</h4>
+            <h4>Enter the trip id associated with the trip.</h4>
             <br />
             <h6 style={{ color: 'red' }}>{this.state.error}</h6>
             <form onSubmit={this.getTripDetailsFromUserInput}>
@@ -182,13 +184,13 @@ class View extends Component {
             <h6>Trip Details</h6>
             <br />
             <div>
-                <label>Destination : {this.state.destination}</label>
+                <label><span style={{ fontWeight: '500' }}>Destination : </span>{this.state.destination}</label>
             </div>
             <div>
-                <label>Trip Owner : {this.state.user.userName} </label>
+                <label><span style={{ fontWeight: '500' }}>Trip owner : </span> {this.state.user.userName} </label>
                 <br />
-                <label>Other Listed Trip Friends </label>
-                {this.state.finalTrip.users.map((u, index) => <h6 key={index}>{u}</h6>)}
+                <label className="h6">Trip members in all! </label>
+                {this.state.finalTrip.users.map((u, index) => <h6 style={{ fontWeight: 'unset' }} key={index}>{u}</h6>)}
             </div>
         </div>
 

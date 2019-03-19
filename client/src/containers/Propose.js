@@ -24,6 +24,11 @@ class Propose extends Component {
         this.state = { user: { userId, userName }, activeStep: 0, destination: "", width: 0, tripSelectionUrl: "https://rkbeavs.me/trpo/select?tripId=", suggestedPlaces: ['New York, USA', 'San Francisco, USA', 'Florida, USA', 'Portland, USA'], selectedDays: [], listAirbnbPlaces: [], listGooglePlaces: [], selectedGooglePlaces: {}, listRestaurants: [], selectedRestaurants: {}, selectedAirbnbPlaces: {}, userOtherOptions: { userShare: 0, userHasCar: false, userCarFit: 0 } };
     }
 
+    componentDidMount() {
+        let elmnt = document.getElementById("root");
+        setTimeout(() => elmnt.scrollIntoView(), 0);
+    }
+
     getPlaceSuggestions = (enteredPlace) => {
         const url = '/placeSuggestions?dest=' + enteredPlace;
         axios.get(url,
@@ -39,7 +44,7 @@ class Propose extends Component {
 
     CityComponent = () =>
         <div>
-            <h4>Propose a City for a Trip</h4>
+            <h4>Propose a city name for the trip.</h4>
             <br />
             <input className="form-control" style={{ width: '50%', margin: "auto" }} placeholder="Enter a destination" required={true} type="text" defaultValue={this.state.destination}
                 list="data" onChange={(e) => { this.getPlaceSuggestions(e.target.value); this.setState({ destination: e.target.value }) }} />
@@ -157,7 +162,7 @@ class Propose extends Component {
 
     DateComponent = () =>
         <div>
-            <h4>Choose the Trip Dates</h4>
+            <h4>Select multiple trip dates when you are able to make the trip.</h4>
             <br />
             <DayPicker selectedDays={this.state.selectedDays} disabledDays={{ before: new Date() }} onDayClick={this.handleDayClick.bind(this)}
             />
@@ -167,7 +172,7 @@ class Propose extends Component {
         <div>
             <h4>Trip Share and Car Details</h4>
             <br />
-            <label style={{ paddingRight: '10px' }}>Enter your share for the Trip (in $)</label>
+            <label style={{ paddingRight: '10px' }}>Enter the share you are willing to contribute for the trip (in $)</label>
             <input className="inputShare inputPlace" placeholder="Enter a Share Amount in $" required={true} type="number" defaultValue={this.state.userOtherOptions.userShare}
                 onChange={(e) => {
                     const { userOtherOptions } = this.state;
@@ -176,7 +181,7 @@ class Propose extends Component {
                 }} />
             <br />
             <div >
-                <label style={{ paddingRight: '15px' }}>Do you own a Car for the Trip?</label>
+                <label style={{ paddingRight: '15px' }}>Do you own a car for the trip?</label>
                 <label>
                     <input type="checkbox" checked={this.state.userOtherOptions.userHasCar} onChange={(e) => {
                         const { userOtherOptions } = this.state;
@@ -297,7 +302,9 @@ class Propose extends Component {
 
                                 <button className="btn btn-light" onClick={() => {
                                     this.refs.progressTrip.style.width = this.state.width - 20 + '%';
-                                    this.setState({ activeStep: this.state.activeStep - 1, width: this.state.width - 20 })
+                                    this.setState({ activeStep: this.state.activeStep - 1, width: this.state.width - 20 });
+                                    let elmnt = document.getElementById("root");
+                                    setTimeout(() => elmnt.scrollIntoView(), 0);
                                 }} disabled={this.state.activeStep === 0}>Back</button>
 
                                 {this.state.activeStep !== 5 ?
@@ -306,7 +313,9 @@ class Propose extends Component {
                                             this.generateGoogleAndAirbnbPlaces();
                                         };
                                         this.refs.progressTrip.style.width = this.state.width + 20 + '%';
-                                        this.setState({ activeStep: this.state.activeStep + 1, width: this.state.width + 20 })
+                                        this.setState({ activeStep: this.state.activeStep + 1, width: this.state.width + 20 });
+                                        let elmnt = document.getElementById("root");
+                                        setTimeout(() => elmnt.scrollIntoView(), 0);
                                     }}>Next</button>
                                     :
                                     <button className="btn btn-dark" onClick={() => {
