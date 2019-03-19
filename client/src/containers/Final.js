@@ -22,10 +22,12 @@ class Final extends Component {
         const tripId = props.location.search.split('=')[1];
         const userId = localStorage.getItem('userId');
         const userName = localStorage.getItem('userName');
-        this.state = { error: '', finalTrip: {}, user: { userId, userName }, tripId: tripId, tripOId: '', activeStep: 0, destination: "", tripViewUrl: "https://rkbeavs.me/trpo/view?tripId=", userSelection: {}, tripSelectedOptions: {}, selectedDays: [], finalSelectedDays: [], listAirbnbPlaces: [], listGooglePlaces: [], listRestaurants: [], selectedRestaurants: {}, selectedGooglePlaces: {}, selectedAirbnbPlaces: {}, userOtherOptions: { userShare: 0, userHasCar: 0, userCarFit: 0 } };
+        this.state = { error: '', finalTrip: {}, user: { userId, userName }, tripId: tripId, tripOId: '', activeStep: 0, destination: "", tripViewUrl: "https://rkbeavs.me/trpo/view?tripId=", userSelection: {}, tripSelectedOptions: {}, selectedDays: [], finalSelectedDays: [], listAirbnbPlaces: [], listGooglePlaces: [], listRestaurants: [], selectedRestaurants: {}, showSelectedRestaurants: {}, selectedGooglePlaces: {}, showSelectedGooglePlaces: {}, selectedAirbnbPlaces: {}, showSelectedAirbnbPlaces: {}, userOtherOptions: { userShare: 0, userHasCar: 0, userCarFit: 0 } };
     }
 
     componentDidMount() {
+        let elmnt = document.getElementById("root");
+        setTimeout(() => elmnt.scrollIntoView(), 0);
         const query = new URLSearchParams(this.props.location.search);
         const queryParams = {};
         for (let param of query.entries()) {
@@ -39,8 +41,8 @@ class Final extends Component {
     }
 
     finalize = async (tripSel, tripListGooglePlaces, tripListAirbnbPlaces, tripListRestaurants) => {
-        let finalTrip = { users: [], selectedGooglePlaces: {}, selectedAirbnbPlaces: {}, selectedRestaurants: {}, selectedDays: {}, userShare: 0, userHasCar: 0, userCarFit: 0 }
-        const f_sort = (sel) => { let y = Object.keys(sel); let z = y.sort((a, b) => sel[b] - sel[a]); let x = {}; z.forEach((e) => { x[e] = 1 }); return x };
+        let finalTrip = { users: [], selectedOtherOptions: [], selectedGooglePlaces: {}, selectedAirbnbPlaces: {}, selectedRestaurants: {}, selectedDays: {}, userShare: 0, userHasCar: 0, userCarFit: 0 }
+        const f_sort = (sel) => { let y = Object.keys(sel); let z = y.sort((a, b) => sel[b] - sel[a]); return z };
         const f_map = (selPlace, sel) => { let selList = sel.length ? sel : Object.keys(sel); selList.map((s) => { if (!selPlace[s]) { selPlace[s] = 0; }; selPlace[s] += 1; }) };
         let userIds = Object.keys(tripSel);
         userIds.map((s) => {
@@ -49,6 +51,9 @@ class Final extends Component {
             f_map(finalTrip.selectedRestaurants, tripSel[s].selectedRestaurants);
             f_map(finalTrip.selectedDays, tripSel[s].selectedDays);
             finalTrip.users.push(tripSel[s].userName);
+            let userName = tripSel[s].userName;
+            let userShare = tripSel[s].userOtherOptions.userShare;
+            finalTrip.selectedOtherOptions.push({ userName, userShare });
             finalTrip.userShare += Number(tripSel[s].userOtherOptions.userShare);
             if (tripSel[s].userOtherOptions.userHasCar) { finalTrip.userHasCar += 1 };
             finalTrip.userCarFit += Number(tripSel[s].userOtherOptions.userCarFit);
@@ -58,29 +63,30 @@ class Final extends Component {
         let topSelectedRestaurants = f_sort(finalTrip.selectedRestaurants);
         let topSelectedDays = f_sort(finalTrip.selectedDays);
         let userOtherOptions = { userShare: finalTrip.userShare, userHasCar: finalTrip.userHasCar, userCarFit: finalTrip.userCarFit }
-        //console.log(finalTrip);
-        let selectedGooglePlaces = topSelectedGooglePlaces;
+
+        finalTrip.topSelectedGooglePlaces = topSelectedGooglePlaces;
+        finalTrip.topSelectedAirbnbPlaces = topSelectedAirbnbPlaces;
+        finalTrip.topSelectedRestaurants = topSelectedRestaurants;
+
         let listGooglePlaces = [];
         tripListGooglePlaces.forEach((i) => {
-            if (topSelectedGooglePlaces[i.id]) {
+            if (finalTrip.selectedGooglePlaces[i.id]) {
                 listGooglePlaces.push(i);
             }
         });
         let listAirbnbPlaces = [];
-        let selectedAirbnbPlaces = topSelectedAirbnbPlaces;
         tripListAirbnbPlaces.forEach((i) => {
-            if (topSelectedAirbnbPlaces[i.id]) {
+            if (finalTrip.selectedAirbnbPlaces[i.id]) {
                 listAirbnbPlaces.push(i);
             }
         });
         let listRestaurants = [];
-        let selectedRestaurants = topSelectedRestaurants;
         tripListRestaurants.forEach((i) => {
-            if (topSelectedRestaurants[i.id]) {
+            if (finalTrip.selectedRestaurants[i.id]) {
                 listRestaurants.push(i);
             }
         });
-        this.setState({ finalTrip, finalSelectedDays: Object.keys(topSelectedDays), selectedGooglePlaces, selectedAirbnbPlaces, selectedRestaurants, listGooglePlaces, listAirbnbPlaces, listRestaurants, userOtherOptions });
+        this.setState({ finalTrip, finalSelectedDays: topSelectedDays, selectedGooglePlaces: JSON.parse(JSON.stringify(finalTrip.selectedGooglePlaces)), selectedRestaurants: JSON.parse(JSON.stringify(finalTrip.selectedRestaurants)), showSelectedGooglePlaces: finalTrip.selectedGooglePlaces, showSelectedAirbnbPlaces: finalTrip.selectedAirbnbPlaces, showSelectedRestaurants: finalTrip.selectedRestaurants, listGooglePlaces, listAirbnbPlaces, listRestaurants, userOtherOptions });
     }
 
     getTripDetails = async (tripId) => {
@@ -108,7 +114,7 @@ class Final extends Component {
 
     FinalHomeComponent = () =>
         <div>
-            <h4>Enter the trip id associated with the trip</h4>
+            <h4>Enter the trip id associated with the trip.</h4>
             <br />
             <h6 style={{ color: 'red' }}>{this.state.error}</h6>
             <form onSubmit={this.getTripDetailsFromUserInput}>
@@ -147,14 +153,44 @@ class Final extends Component {
         };
         return (
             <div>
-                <h6>Trip Dates selected!</h6>
-                <DayPicker modifiers={modifiers} month={new Date(this.state.finalSelectedDays[0])}
+                <h6>Choose final trip dates from top selected!</h6>
+                <DayPicker modifiers={modifiers} month={new Date(this.state.finalSelectedDays[0] || new Date().toDateString())}
                     modifiersStyles={modifiersStyles} selectedDays={this.state.selectedDays.map((day) => new Date(day))}
                     disabledDays={{ before: new Date() }} onDayClick={this.handleDayClick.bind(this)}
                 />
             </div>
         )
     }
+
+    SelectedDateComponent = () =>
+        <div>
+            <h6>Trip Dates selected!</h6>
+            <br />
+            {this.state.finalSelectedDays.map((day, index) => {
+                return (
+                    <div key={index}>
+                        <label>{new Date(day).toDateString()}{' '}
+                            (<span style={{ color: 'green' }}>{this.state.finalTrip.selectedDays[day]}⯅</span>)
+                        </label>
+                    </div>)
+            })}
+            <br />
+            <this.SelectedShareComponent />
+        </div>
+
+    SelectedShareComponent = () =>
+        <div>
+            <h6>Trip Shares estimated!</h6>
+            {this.state.finalTrip.selectedOtherOptions.map((opt, index) => {
+                return (
+                    <div key={index}>
+                        <label>{opt.userName}{' '}
+                            (<span style={{ color: 'rgb(231, 113, 27)' }}>${opt.userShare}</span>)
+                        </label>
+                    </div>)
+            })}
+        </div>
+
     ShareAndCarComponent = () =>
         <div>
             <h6>Trip Share and Car Details</h6>
@@ -193,7 +229,7 @@ class Final extends Component {
     handleGoogleClick = (place, e) => {
         e.preventDefault();
         const { selectedGooglePlaces } = this.state;
-        if (selectedGooglePlaces[place.id] !== 1) {
+        if (!selectedGooglePlaces[place.id]) {
             selectedGooglePlaces[place.id] = 1;
             if (e.target.parentElement.id === 'googleGrid') {
                 e.target.parentElement.className = 'card grid-item-selected'
@@ -235,7 +271,7 @@ class Final extends Component {
     handleRestaurantClick = (restaurant, e) => {
         e.preventDefault();
         const { selectedRestaurants } = this.state;
-        if (selectedRestaurants[restaurant.id] !== 1) {
+        if (!selectedRestaurants[restaurant.id]) {
             selectedRestaurants[restaurant.id] = 1;
             if (e.target.parentElement.id === 'restaurantGrid') {
                 e.target.parentElement.className = 'card grid-item-selected'
@@ -258,13 +294,13 @@ class Final extends Component {
             <h6>Trip Details</h6>
             <br />
             <div>
-                <label>Destination : {this.state.destination}</label>
+                <label><span style={{ fontWeight: '500' }}>Destination : </span>{this.state.destination}</label>
             </div>
             <div>
-                <label>Trip Owner : {this.state.user.userName} </label>
+                <label><span style={{ fontWeight: '500' }}>Trip owner : </span> {this.state.user.userName} </label>
                 <br />
-                <label>Other Listed Trip Friends </label>
-                {this.state.finalTrip.users.map((u, index) => <h6 key={index}>{u}</h6>)}
+                <label className="h6">Trip members in all! </label>
+                {this.state.finalTrip.users.map((u, index) => <h6 style={{ fontWeight: 'unset' }} key={index}>{u}</h6>)}
             </div>
         </div>
 
@@ -290,6 +326,8 @@ class Final extends Component {
         <button className="btn btn-dark" onClick={() => {
             this.generateTripOptions();
             this.setState({ activeStep: 2 })
+            let elmnt = document.getElementById("root");
+            setTimeout(() => elmnt.scrollIntoView(), 0);
         }}>Finalize</button>
     </div>
 
@@ -298,15 +336,16 @@ class Final extends Component {
         <div>
             <div className="grid-container-view">
                 <this.TripHomeComponent />
+                <this.SelectedDateComponent />
                 <this.DateComponent />
                 <this.ShareAndCarComponent />
             </div>
             <br /><br />
-            <GoogleTest status={true} destination={this.state.destination} listGooglePlaces={this.state.listGooglePlaces} selectedGooglePlaces={this.state.selectedGooglePlaces} handleGoogleClick={this.handleGoogleClick} />
+            <GoogleTest status={true} destination={this.state.destination} showUpVotes={true} listGooglePlaces={this.state.listGooglePlaces} selectedGooglePlaces={this.state.selectedGooglePlaces} showSelectedGooglePlaces={this.state.showSelectedGooglePlaces} handleGoogleClick={this.handleGoogleClick} />
             <br /><br /><br />
-            <AirbnbTest status={true} destination={this.state.destination} listAirbnbPlaces={this.state.listAirbnbPlaces} selectedAirbnbPlaces={this.state.selectedAirbnbPlaces} handleAirbnbClick={this.handleAirbnbClick} />
+            <RestaurantTest status={true} destination={this.state.destination} showUpVotes={true} listRestaurants={this.state.listRestaurants} selectedRestaurants={this.state.selectedRestaurants} showSelectedRestaurants={this.state.showSelectedRestaurants} handleRestaurantClick={this.handleRestaurantClick} />
             <br /><br /><br />
-            <RestaurantTest status={true} destination={this.state.destination} listRestaurants={this.state.listRestaurants} selectedRestaurants={this.state.selectedRestaurants} handleRestaurantClick={this.handleRestaurantClick} />
+            <AirbnbTest status={true} destination={this.state.destination} showUpVotes={true} listAirbnbPlaces={this.state.listAirbnbPlaces} selectedAirbnbPlaces={this.state.selectedAirbnbPlaces} showSelectedAirbnbPlaces={this.state.showSelectedAirbnbPlaces} handleAirbnbClick={this.handleAirbnbClick} />
             <br /><br />
             <this.FinalizeComponent />
         </div>
