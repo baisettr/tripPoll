@@ -17,6 +17,11 @@ class Home extends Component {
         this.state = { error: "", actionStep: 0, userTrips: [], userResponses: [], userChartData: [], userPlaceData: [], userDateData: [] }
     }
 
+    componentDidMount() {
+        let elmnt = document.getElementById("root");
+        setTimeout(() => elmnt.scrollIntoView(), 0);
+    }
+
     userTripsClickHandler = (e) => {
         e.preventDefault();
         this.setState({ actionStep: 3 });
@@ -27,6 +32,9 @@ class Home extends Component {
         ).then((res) => {
             //console.log(res.data.data)
             this.setState({ actionStep: 1, userTrips: res.data.data });
+
+            let elmnt = document.getElementById("userTrips");
+            setTimeout(() => elmnt.scrollIntoView(), 100);
         }).catch((error) => {
             const message = error.response.data.message;
             this.setState({ error: message, actionStep: 4 });
@@ -43,6 +51,8 @@ class Home extends Component {
         ).then((res) => {
             //console.log(res.data.data)
             this.setState({ actionStep: 2, userResponses: res.data.data });
+            let elmnt = document.getElementById("userResponses");
+            setTimeout(() => elmnt.scrollIntoView(), 100);
         }).catch((error) => {
             const message = error.response.data.message;
             this.setState({ error: message, actionStep: 4 });
@@ -76,6 +86,8 @@ class Home extends Component {
                 userDateData.push(row);
             }
             this.setState({ actionStep: 5, userChartData, userPlaceData, userDateData });
+            let elmnt = document.getElementById("userSummary");
+            setTimeout(() => elmnt.scrollIntoView(), 100);
         }).catch((error) => {
             const message = error.response.data.message;
             this.setState({ error: message, actionStep: 4 });
@@ -85,13 +97,14 @@ class Home extends Component {
 
     HomeClickHandler = (e) => {
         e.preventDefault();
-        this.setState({ actionStep: 0 });
+        let elmnt = document.getElementById("root");
+        setTimeout(() => elmnt.scrollIntoView(), 0);
     }
     DashboardComponent = () =>
         <div>
             <h4>Welcome to Trip Poll - Plan before you ride!</h4>
             <br />
-            <div className="grid-container">
+            <div className="grid-container-view">
                 <div className="card grid-item">
                     <div className="card-title">My Trips</div>
                     <div className="card-body">
@@ -138,7 +151,7 @@ class Home extends Component {
     }
 
     userTripsComponent = () =>
-        <div className="jumbotron container" style={styles.divHome}>
+        <div id="userTrips" className="jumbotron container" style={styles.divHome}>
             <h4>My Trips</h4>
 
             <div className="grid-container-home">
@@ -159,7 +172,7 @@ class Home extends Component {
         </div>
 
     userResponsesComponent = () =>
-        <div className="jumbotron container" style={styles.divHome}>
+        <div id="userResponses" className="jumbotron container" style={styles.divHome}>
             <h4>Friend's Trips</h4>
 
             <div className="grid-container-home">
@@ -180,7 +193,7 @@ class Home extends Component {
         </div>
 
     userSummaryComponent = () =>
-        <div className="jumbotron container" style={styles.divHome}>
+        <div id="userSummary" className="jumbotron container" style={styles.divHome}>
             <ChartTest data={this.state.userChartData} data1={this.state.userPlaceData} data2={this.state.userDateData} />
 
         </div>

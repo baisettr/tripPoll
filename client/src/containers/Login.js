@@ -7,6 +7,10 @@ class Login extends Component {
         super(props);
         this.state = { isSignedIn: false, userName: "", userEmail: "", userId: "", userPassword: "", error: '', userDetails: {}, actionStep: 0, loadSpin: false };
     }
+    componentDidMount() {
+        let elmnt = document.getElementById("root");
+        setTimeout(() => elmnt.scrollIntoView(), 0);
+    }
 
     userSignIn = (e) => {
         e.preventDefault();
